@@ -16,6 +16,7 @@ import (
 	"movie-platform/internal/middleware"
 	"movie-platform/modules/auth"
 	"movie-platform/modules/catalog"
+	"movie-platform/modules/engagement"
 	"movie-platform/modules/users"
 	"movie-platform/modules/watch_history"
 
@@ -34,7 +35,7 @@ func main() {
 	defer sqlDB.Close()
 
 	if cfg.Environment != "production" {
-		if err := db.AutoMigrate(&users.User{}, &watch_history.WatchHistory{}, &catalog.Genre{}, &catalog.Movie{}, &catalog.Series{}, &catalog.Season{}, &catalog.Episode{}); err != nil {
+		if err := db.AutoMigrate(&users.User{}, &watch_history.WatchHistory{}, &catalog.Genre{}, &catalog.Movie{}, &catalog.Series{}, &catalog.Season{}, &catalog.Episode{}, &engagement.Favorite{}, &engagement.Rating{}); err != nil {
 			logger.Error("migration failed", "error", err); os.Exit(1)
 		}
 	}
@@ -43,6 +44,7 @@ func main() {
 	authHandler := auth.NewHandler(auth.NewService(userRepo, cfg))
 	historyHandler := watch_history.NewHandler(watch_history.NewService(watch_history.NewRepository(db)))
 	catalogHandler := catalog.NewHandler(catalog.NewService(catalog.NewRepository(db)))
+	engagementHandler := engagement.NewHandler(engagement.NewService(engagement.NewRepository(db)))
 
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID, middleware.Recover(logger), middleware.SecurityHeaders, middleware.BodyLimit(1<<20), middleware.Timeout(15*time.Second), middleware.RateLimit(120, time.Minute), middleware.CORS(cfg.AllowedOrigins))
@@ -67,6 +69,7 @@ func main() {
 				httpx.JSON(w, 200, u)
 			})
 			watch_history.RegisterRoutes(p, historyHandler)
+			engagement.RegisterRoutes(p, engagementHandler)
 		})
 	})
 
