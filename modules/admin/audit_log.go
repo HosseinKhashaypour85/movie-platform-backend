@@ -170,7 +170,7 @@ func (h *Handler) ListAuditLogs(w http.ResponseWriter, r *http.Request) {
 	var rows []AuditLog
 	offset := (page - 1) * limit
 	if err := query.Order("created_at DESC").Order("id DESC").Limit(limit).Offset(offset).Find(&rows).Error; err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		httpx.Error(w, http.StatusInternalServerError, "internal_error", "internal server error")
 		return
 	}
 	httpx.JSON(w, http.StatusOK, map[string]any{
