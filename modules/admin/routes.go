@@ -2,6 +2,7 @@ package admin
 
 import (
 	"github.com/go-chi/chi/v5"
+	"log/slog"
 	"movie-platform/internal/middleware"
 )
 
@@ -9,6 +10,8 @@ func RegisterRoutes(r chi.Router, h *Handler) {
 	r.Route("/admin", func(r chi.Router) {
 		r.Use(middleware.RequireRole("admin", "super_admin"))
 		r.Get("/dashboard", h.Dashboard)
+		r.Get("/audit-logs", h.ListAuditLogs)
+		r.Use(AuditMiddleware(h.db, slog.Default()))
 		r.Route("/movies", func(r chi.Router) {
 			r.Post("/", h.CreateMovie)
 			r.Put("/{id}", h.UpdateMovie)
