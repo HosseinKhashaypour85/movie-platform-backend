@@ -98,7 +98,7 @@ func AuditMiddleware(db *gorm.DB, logger *slog.Logger) func(http.Handler) http.H
 				Action: r.Method,
 				ResourceType: resourceType,
 				ResourceID: resourceID,
-				Path: r.URL.Path,
+				Path: truncateAuditValue(r.URL.Path, 255),
 				StatusCode: status,
 				IPAddress: ip,
 				UserAgent: userAgent,
@@ -113,11 +113,21 @@ func AuditMiddleware(db *gorm.DB, logger *slog.Logger) func(http.Handler) http.H
 	}
 }
 
+func truncateAuditValue(value string, max int) string {
+	if len(value) > max {
+		return value[:max]
+	}
+	return value
+}
+
 func (h *Handler) ListAuditLogs(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 	if page < 1 {
 		page = 1
+	}
+	if page > 1000000 {
+		page = 1000000
 	}
 	if limit < 1 {
 		limit = 25
