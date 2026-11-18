@@ -15,6 +15,7 @@ import (
 	"movie-platform/internal/httpx"
 	"movie-platform/internal/middleware"
 	"movie-platform/modules/auth"
+	"movie-platform/modules/admin"
 	"movie-platform/modules/catalog"
 	"movie-platform/modules/engagement"
 	"movie-platform/modules/users"
@@ -45,6 +46,7 @@ func main() {
 	historyHandler := watch_history.NewHandler(watch_history.NewService(watch_history.NewRepository(db)))
 	catalogHandler := catalog.NewHandler(catalog.NewService(catalog.NewRepository(db)))
 	engagementHandler := engagement.NewHandler(engagement.NewService(engagement.NewRepository(db)))
+	adminHandler := admin.NewHandler(db)
 
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID, middleware.Recover(logger), middleware.SecurityHeaders, middleware.BodyLimit(1<<20), middleware.Timeout(15*time.Second), middleware.RateLimit(120, time.Minute), middleware.CORS(cfg.AllowedOrigins))
@@ -58,6 +60,7 @@ func main() {
 
 	router.Route("/api/v1", func(r chi.Router) {
 		auth.RegisterRoutes(r, authHandler)
+		r.Group(func(protected chi.Router) { protected.Use(middleware.Auth(cfg.JWTSecret,cfg.JWTIssuer)); admin.RegisterRoutes(protected,adminHandler) })
 		catalog.RegisterRoutes(r, catalogHandler)
 		r.Group(func(p chi.Router) {
 			p.Use(middleware.Auth(cfg.JWTSecret, cfg.JWTIssuer))
