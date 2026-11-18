@@ -1,7 +1,7 @@
 package admin
 
 import (
-	"encoding/json"\n\t"fmt"
+	"encoding/json"\n\t"strconv"
 	"errors"
 	"io"
 	"net/http"
@@ -59,7 +59,7 @@ func validCatalogFields(title, slug string, rating float32) bool {
 }
 func adminID(r *http.Request) (uint,bool) {
 	var id uint64
-	if _,err:=fmt.Sscan(chi.URLParam(r,"id"),&id); err!=nil || id==0 { return 0,false }
+	parsed,err:=strconv.ParseUint(chi.URLParam(r,"id"),10,64); if err!=nil || parsed==0 { return 0,false }; id=parsed
 	return uint(id),true
 }
 
