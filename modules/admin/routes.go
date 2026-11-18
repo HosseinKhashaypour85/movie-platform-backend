@@ -19,5 +19,15 @@ func RegisterRoutes(r chi.Router, h *Handler) {
 			r.Put("/{id}", h.UpdateSeries)
 			r.Delete("/{id}", h.DeleteSeries)
 		})
+		r.Route("/seasons", func(r chi.Router) {
+			r.Post("/", h.CreateSeason)
+			r.Put("/{id}", h.UpdateSeason)
+			r.Delete("/{id}", h.DeleteSeason)
+		})
+		r.Route("/episodes", func(r chi.Router) {
+			r.Post("/", h.CreateEpisode)
+			r.Put("/{id}", h.UpdateEpisode)
+			r.Delete("/{id}", h.DeleteEpisode)
+		})
 	})
 }
