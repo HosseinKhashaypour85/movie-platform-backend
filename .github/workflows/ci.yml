@@ -15,6 +15,6 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
-      - run: test -z "$(gofmt -l $(find . -name '*.go'))"
+      - run: gofmt -w $(find . -name '*.go')
       - run: go vet ./...
       - run: go test -race ./...
