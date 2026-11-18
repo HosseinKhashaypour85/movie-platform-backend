@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+
+	"movie-platform/internal/httpx"
 	"strconv"
 	"strings"
 	"time"
@@ -128,7 +130,7 @@ func (h *Handler) ListAuditLogs(w http.ResponseWriter, r *http.Request) {
 	if actor := r.URL.Query().Get("actor_user_id"); actor != "" {
 		id, err := strconv.ParseUint(actor, 10, 64)
 		if err != nil || id == 0 {
-			http.Error(w, "invalid actor_user_id", http.StatusBadRequest)
+			httpx.Error(w, http.StatusBadRequest, "validation_error", "invalid actor_user_id")
 			return
 		}
 		query = query.Where("actor_user_id = ?", id)
@@ -138,13 +140,13 @@ func (h *Handler) ListAuditLogs(w http.ResponseWriter, r *http.Request) {
 		case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
 			query = query.Where("action = ?", action)
 		default:
-			http.Error(w, "invalid action", http.StatusBadRequest)
+			httpx.Error(w, http.StatusBadRequest, "validation_error", "invalid action")
 			return
 		}
 	}
 	if resource := strings.TrimSpace(r.URL.Query().Get("resource_type")); resource != "" {
 		if len(resource) > 40 {
-			http.Error(w, "invalid resource_type", http.StatusBadRequest)
+			httpx.Error(w, http.StatusBadRequest, "validation_error", "invalid resource_type")
 			return
 		}
 		query = query.Where("resource_type = ?", resource)
@@ -152,7 +154,7 @@ func (h *Handler) ListAuditLogs(w http.ResponseWriter, r *http.Request) {
 
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		httpx.Error(w, http.StatusInternalServerError, "internal_error", "internal server error")
 		return
 	}
 	var rows []AuditLog
