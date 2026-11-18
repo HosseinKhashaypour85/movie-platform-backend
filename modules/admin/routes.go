@@ -1,8 +1,8 @@
 package admin
 
 import (
-	"movie-platform/internal/middleware"
 	"github.com/go-chi/chi/v5"
+	"movie-platform/internal/middleware"
 )
 
 func RegisterRoutes(r chi.Router, h *Handler) {

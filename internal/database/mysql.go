@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"movie-platform/internal/config"
 	mysqlDriver "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"movie-platform/internal/config"
 )
 
 func Open(cfg config.Config) (*gorm.DB, error) {
@@ -20,15 +20,22 @@ func Open(cfg config.Config) (*gorm.DB, error) {
 	db, err := gorm.Open(mysqlDriver.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Warn),
 	})
-	if err != nil { return nil, fmt.Errorf("open mysql: %w", err) }
+	if err != nil {
+		return nil, fmt.Errorf("open mysql: %w", err)
+	}
 	sqlDB, err := db.DB()
-	if err != nil { return nil, fmt.Errorf("get mysql pool: %w", err) }
+	if err != nil {
+		return nil, fmt.Errorf("get mysql pool: %w", err)
+	}
 	sqlDB.SetMaxOpenConns(cfg.DBMaxOpen)
 	sqlDB.SetMaxIdleConns(cfg.DBMaxIdle)
 	sqlDB.SetConnMaxLifetime(cfg.DBConnMaxLifetime)
 	sqlDB.SetConnMaxIdleTime(5 * time.Minute)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if err := sqlDB.PingContext(ctx); err != nil { _ = sqlDB.Close(); return nil, fmt.Errorf("ping mysql: %w", err) }
+	if err := sqlDB.PingContext(ctx); err != nil {
+		_ = sqlDB.Close()
+		return nil, fmt.Errorf("ping mysql: %w", err)
+	}
 	return db, nil
 }
