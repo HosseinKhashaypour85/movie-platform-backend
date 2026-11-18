@@ -1,74 +1,9 @@
-
 package watch_history
 
-import (
-	"gorm.io/gorm"
-)
-
-type Repository struct {
-	DB *gorm.DB
-}
-
-func NewRepository(db *gorm.DB) *Repository {
-	return &Repository{
-		DB: db,
-	}
-}
-
-// CreateOrUpdate آخرین وضعیت تماشای کاربر را ذخیره می‌کند
-func (r *Repository) CreateOrUpdate(history *WatchHistory) error {
-	var existing WatchHistory
-
-	err := r.DB.
-		Where("user_id = ? AND movie_id = ?", history.UserID, history.MovieID).
-		First(&existing).Error
-
-	if err == gorm.ErrRecordNotFound {
-		return r.DB.Create(history).Error
-	}
-
-	if err != nil {
-		return err
-	}
-
-	return r.DB.Model(&existing).Updates(map[string]interface{}{
-		"progress_seconds": history.ProgressSeconds,
-		"duration_seconds": history.DurationSeconds,
-		"completed":        history.Completed,
-		"watched_at":       history.WatchedAt,
-	}).Error
-}
-
-// FindByUserID تاریخچه تماشای یک کاربر را دریافت می‌کند
-func (r *Repository) FindByUserID(userID uint) ([]WatchHistory, error) {
-	var histories []WatchHistory
-
-	err := r.DB.
-		Where("user_id = ?", userID).
-		Order("watched_at DESC").
-		Find(&histories).Error
-
-	return histories, err
-}
-
-// FindByUserAndMovie یک فیلم مشخص از تاریخچه کاربر را پیدا می‌کند
-func (r *Repository) FindByUserAndMovie(userID uint, movieID uint) (*WatchHistory, error) {
-	var history WatchHistory
-
-	err := r.DB.
-		Where("user_id = ? AND movie_id = ?", userID, movieID).
-		First(&history).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &history, nil
-}
-
-// Delete حذف یک رکورد از تاریخچه
-func (r *Repository) Delete(userID uint, movieID uint) error {
-	return r.DB.
-		Where("user_id = ? AND movie_id = ?", userID, movieID).
-		Delete(&WatchHistory{}).Error
-}
+import ("errors";"time";"gorm.io/gorm";"gorm.io/gorm/clause")
+type Repository struct{DB *gorm.DB}
+func NewRepository(db *gorm.DB)*Repository{return &Repository{DB:db}}
+func(r *Repository)CreateOrUpdate(h *WatchHistory)error{if h==nil{return errors.New("history is required")};if h.WatchedAt.IsZero(){h.WatchedAt=time.Now().UTC()};return r.DB.Clauses(clause.OnConflict{Columns:[]clause.Column{{Name:"user_id"},{Name:"movie_id"}},DoUpdates:clause.AssignmentColumns([]string{"progress_seconds","duration_seconds","completed","watched_at","updated_at"})}).Create(h).Error}
+func(r *Repository)FindByUserID(uid uint,limit,offset int)([]WatchHistory,error){if limit<1||limit>100{limit=20};if offset<0{offset=0};var rows []WatchHistory;e:=r.DB.Where("user_id = ?",uid).Order("watched_at DESC").Limit(limit).Offset(offset).Find(&rows).Error;return rows,e}
+func(r *Repository)FindByUserAndMovie(uid,mid uint)(*WatchHistory,error){var h WatchHistory;if e:=r.DB.Where("user_id = ? AND movie_id = ?",uid,mid).First(&h).Error;e!=nil{return nil,e};return &h,nil}
+func(r *Repository)Delete(uid,mid uint)error{return r.DB.Where("user_id = ? AND movie_id = ?",uid,mid).Delete(&WatchHistory{}).Error}
