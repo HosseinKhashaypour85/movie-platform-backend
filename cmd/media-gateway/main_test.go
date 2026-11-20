@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"time"
 
 	"movie-platform/modules/media"
 )
@@ -146,5 +145,4 @@ func TestGatewayDoesNotFollowOriginRedirects(t *testing.T) {
 	if strings.Contains(rec.Body.String(), "example.invalid") {
 		t.Fatal("origin redirect target leaked to client")
 	}
-	_ = time.Second // keep test time-independent; signed URLs use current UTC time.
 }
