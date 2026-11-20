@@ -7,8 +7,7 @@ import (
 	"errors"
 	"net/url"
 	"os"
-	"sort"
-	"strings"
+		"strings"
 	"time"
 )
 
@@ -78,7 +77,7 @@ func (s *S3Presigner) PresignPut(objectKey, contentType string, now time.Time, t
 	q.Set("X-Amz-Expires",strconvI(int(ttl.Seconds())))
 	q.Set("X-Amz-SignedHeaders",signedHeaders)
 	u.RawQuery=q.Encode()
-	canonicalHeaders:="content-type:"+strings.TrimSpace(contentType)+"\n"+"host:"+u.Host+"\n"
+	canonicalHeaders:="content-type:"+strings.TrimSpace(contentType)+"\n"+"host:"+strings.ToLower(u.Host)+"\n"
 	canonicalRequest:="PUT\n"+u.EscapedPath()+"\n"+u.RawQuery+"\n"+canonicalHeaders+"\n"+signedHeaders+"\nUNSIGNED-PAYLOAD"
 	stringToSign:="AWS4-HMAC-SHA256\n"+amzDate+"\n"+scope+"\n"+sha256Hex(canonicalRequest)
 	signature:=hex.EncodeToString(hmacSHA256(s.signingKey(date),stringToSign))
@@ -97,10 +96,3 @@ func strconvI(v int) string {
 	return string(b[i:])
 }
 
-// canonicalQuery is retained as a small helper for deterministic signing tests.
-func canonicalQuery(values url.Values) string {
-	keys:=make([]string,0,len(values))
-	for k:=range values { keys=append(keys,k) }
-	sort.Strings(keys)
-	return values.Encode()
-}
