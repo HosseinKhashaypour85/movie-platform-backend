@@ -69,17 +69,39 @@ func signature(key []byte, objectPath string, expires int64) string {
 	return base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
 }
 
-// VerifyPlaybackSignature is intended for a trusted edge integration, not as a
-// public API endpoint. The edge must additionally validate the asset/path scope.
+// VerifyPlaybackSignature validates a signature bound to one exact object path.
 func VerifyPlaybackSignature(key []byte, objectPath string, expires int64, supplied string, now time.Time) bool {
-	if len(key) < 32 || expires <= now.Unix() || expires > now.Add(5*time.Minute+30*time.Second).Unix() {
+	if !validPlaybackExpiry(expires, now) { return false }
+	return verifySignature(key, objectPath, expires, supplied)
+}
+
+// VerifyPlaybackScopeSignature authorizes a request only when its canonical path
+// is inside the signed asset directory. A trusted CDN edge can exchange the
+// signed master-manifest query for a short-lived cookie scoped to scopePath.
+func VerifyPlaybackScopeSignature(key []byte, scopePath, requestPath string, expires int64, supplied string, now time.Time) bool {
+	if !validPlaybackExpiry(expires, now) || !validPlaybackScope(scopePath) || !validObjectKey(strings.TrimPrefix(requestPath, "/")) {
 		return false
 	}
+	if !strings.HasPrefix(requestPath, scopePath) { return false }
+	return verifySignature(key, scopePath, expires, supplied)
+}
+
+func validPlaybackExpiry(expires int64, now time.Time) bool {
+	return expires > now.Unix() && expires <= now.Add(5*time.Minute+30*time.Second).Unix()
+}
+
+func validPlaybackScope(scope string) bool {
+	return strings.HasPrefix(scope, "/") && strings.HasSuffix(scope, "/") &&
+		len(scope) > 2 && len(scope) <= 1024 &&
+		path.Clean(strings.TrimSuffix(scope, "/"))+"/" == scope &&
+		validObjectKey(strings.Trim(scope, "/"))
+}
+
+func verifySignature(key []byte, message string, expires int64, supplied string) bool {
+	if len(key) < 32 { return false }
 	actual, err := base64.RawURLEncoding.DecodeString(supplied)
-	if err != nil {
-		return false
-	}
-	expected, _ := base64.RawURLEncoding.DecodeString(signature(key, objectPath, expires))
+	if err != nil { return false }
+	expected, _ := base64.RawURLEncoding.DecodeString(signature(key, message, expires))
 	return hmac.Equal(actual, expected)
 }
 
@@ -95,7 +117,9 @@ func (p *Playback) URL(objectKey string, now time.Time) (string, time.Time, erro
 	u.Path = objectPath
 	query := u.Query()
 	query.Set("expires", strconv.FormatInt(expires.Unix(), 10))
-	query.Set("signature", signature(p.key, objectPath, expires.Unix()))
+	scopePath := path.Dir(objectPath) + "/"
+	query.Set("scope", scopePath)
+	query.Set("signature", signature(p.key, scopePath, expires.Unix()))
 	u.RawQuery = query.Encode()
 	return u.String(), expires, nil
 }
