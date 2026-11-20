@@ -100,6 +100,7 @@ func main() {
 				httpx.JSON(w, 200, u)
 			})
 			watch_history.RegisterRoutes(p, historyHandler)
+			notifications.RegisterUserRoutes(p, notificationHandler)
 			engagement.RegisterProtectedRoutes(p, engagementHandler)
 		})
 	})
