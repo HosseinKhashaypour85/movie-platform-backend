@@ -29,6 +29,11 @@ func HLSCookieMiddleware(cfg EdgeAuthConfig) func(http.Handler) http.Handler {
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Cache-Control", "private, no-store")
+			if r.Method != http.MethodGet && r.Method != http.MethodHead {
+				http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+				return
+			}
 			requestPath, ok := canonicalHLSRequestPath(r)
 			if !ok || len(key) < 32 {
 				http.Error(w, "forbidden", http.StatusForbidden)
