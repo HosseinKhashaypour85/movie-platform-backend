@@ -2,6 +2,12 @@ package main
 
 import (
 	"fmt"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
+	"net/url"
+	"strconv"
+	"time"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -144,5 +150,57 @@ func TestGatewayDoesNotFollowOriginRedirects(t *testing.T) {
 	}
 	if strings.Contains(rec.Body.String(), "example.invalid") {
 		t.Fatal("origin redirect target leaked to client")
+	}
+}
+
+func TestGatewayRequiresPlaybackCookieBeforeOriginAccess(t *testing.T) {
+	originHits := 0
+	origin := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		originHits++
+		_, _ = io.WriteString(w, "#EXTM3U")
+	}))
+	defer origin.Close()
+
+	g := newTestGateway(t, origin)
+	key := []byte(strings.Repeat("k", 32))
+	scope := "/hls/42/"
+	expires := time.Now().Add(4 * time.Minute).Unix()
+	mac := hmac.New(sha256.New, key)
+	_, _ = mac.Write([]byte(scope + "\n" + strconv.FormatInt(expires, 10)))
+	sig := base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
+	handler := media.HLSCookieMiddleware(media.EdgeAuthConfig{SigningKey: key})(http.HandlerFunc(g.serveObject))
+
+	unauthorized := httptest.NewRequest(http.MethodGet, "/hls/42/variant/index.m3u8", nil)
+	unauthorizedRec := httptest.NewRecorder()
+	handler.ServeHTTP(unauthorizedRec, unauthorized)
+	if unauthorizedRec.Code != http.StatusForbidden {
+		t.Fatalf("unauthorized status = %d, want 403", unauthorizedRec.Code)
+	}
+	if originHits != 0 {
+		t.Fatal("unauthorized request reached private object storage")
+	}
+
+	manifestURL := "/hls/42/master.m3u8?scope=" + url.QueryEscape(scope) +
+		"&expires=" + strconv.FormatInt(expires, 10) + "&signature=" + url.QueryEscape(sig)
+	manifest := httptest.NewRequest(http.MethodGet, manifestURL, nil)
+	manifestRec := httptest.NewRecorder()
+	handler.ServeHTTP(manifestRec, manifest)
+	if manifestRec.Code != http.StatusOK {
+		t.Fatalf("signed manifest status = %d: %s", manifestRec.Code, manifestRec.Body.String())
+	}
+	cookies := manifestRec.Result().Cookies()
+	if len(cookies) != 1 {
+		t.Fatalf("expected playback cookie, got %d", len(cookies))
+	}
+
+	segment := httptest.NewRequest(http.MethodGet, "/hls/42/variant/segment.ts", nil)
+	segment.AddCookie(cookies[0])
+	segmentRec := httptest.NewRecorder()
+	handler.ServeHTTP(segmentRec, segment)
+	if segmentRec.Code != http.StatusOK {
+		t.Fatalf("authorized segment status = %d: %s", segmentRec.Code, segmentRec.Body.String())
+	}
+	if originHits != 2 {
+		t.Fatalf("private origin hits = %d, want 2 authorized requests", originHits)
 	}
 }
