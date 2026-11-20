@@ -61,7 +61,8 @@ func (s *Service) Register(name, email, password string) (*users.User, error) {
 	return u, nil
 }
 func (s *Service) Login(email, password string) (string, *users.User, error) {
-	return s.LoginWithSession(email, password, "", "")
+	access, _, user, err := s.LoginWithSession(email, password, "", "")
+	return access, user, err
 }
 
 func (s *Service) LoginWithSession(email, password, userAgent, ip string) (string, string, *users.User, error) {
@@ -77,9 +78,25 @@ func (s *Service) LoginWithSession(email, password, userAgent, ip string) (strin
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
 	signed, e := t.SignedString(s.Config.JWTSecret)
 	if e != nil {
-		return "", nil, e
+		return "", "", nil, e
 	}
 	refresh, err := s.Sessions.Create(u.ID, userAgent, ip)
 	if err != nil { return "", "", nil, err }
 	return signed, refresh, u, nil
+}
+
+func (s *Service) Refresh(raw string) (string, string, error) {
+	userID, rotated, err := s.Sessions.Rotate(raw)
+	if err != nil { return "", "", ErrInvalidRefreshToken }
+	user, err := s.Users.FindByID(userID)
+	if err != nil || !user.IsActive {
+		_ = s.Sessions.Revoke(rotated, userID)
+		return "", "", ErrInvalidRefreshToken
+	}
+	now := time.Now()
+	claims := jwt.MapClaims{"user_id":user.ID, "role":user.Role, "iss":s.Config.JWTIssuer, "sub":fmt.Sprint(user.ID), "iat":now.Unix(), "exp":now.Add(s.Config.JWTTTL).Unix()}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	access, err := token.SignedString(s.Config.JWTSecret)
+	if err != nil { return "", "", err }
+	return access, rotated, nil
 }
