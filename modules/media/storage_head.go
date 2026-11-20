@@ -2,13 +2,11 @@ package media
 
 import (
 	"context"
-	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -62,5 +60,3 @@ func (s *S3Presigner) HeadObject(ctx context.Context, objectKey string) (ObjectM
 	return ObjectMetadata{SizeBytes:size, ContentType:strings.ToLower(strings.TrimSpace(strings.Split(resp.Header.Get("Content-Type"), ";")[0]))}, nil
 }
 
-var _ = url.URL{}
-var _ = sha256.Size
