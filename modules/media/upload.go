@@ -54,7 +54,8 @@ func (h *UploadHandler) CreateUpload(w http.ResponseWriter,r *http.Request) {
 		"image/png":".png",
 		"image/webp":".webp",
 	}
-	ext,ok:=allowed[strings.ToLower(strings.TrimSpace(in.ContentType))]
+	in.ContentType = strings.ToLower(strings.TrimSpace(in.ContentType))
+	ext,ok:=allowed[in.ContentType]
 	if !ok || (in.Kind=="video" && ext!=".mp4") || (in.Kind=="poster" && ext==".mp4") {
 		httpx.Error(w,http.StatusBadRequest,"validation_error","unsupported content type for asset kind")
 		return
