@@ -45,14 +45,14 @@ func main() {
 	defer sqlDB.Close()
 
 	if cfg.Environment != "production" {
-		if err := db.AutoMigrate(&users.User{}, &watch_history.WatchHistory{}, &catalog.Genre{}, &catalog.Movie{}, &catalog.Series{}, &catalog.Season{}, &catalog.Episode{}, &engagement.Favorite{}, &engagement.Rating{}, &admin.AuditLog{}); err != nil {
+		if err := db.AutoMigrate(&users.User{}, &auth.Session{}, &watch_history.WatchHistory{}, &catalog.Genre{}, &catalog.Movie{}, &catalog.Series{}, &catalog.Season{}, &catalog.Episode{}, &engagement.Favorite{}, &engagement.Rating{}, &admin.AuditLog{}); err != nil {
 			logger.Error("migration failed", "error", err)
 			os.Exit(1)
 		}
 	}
 
 	userRepo := users.NewRepository(db)
-	authHandler := auth.NewHandler(auth.NewService(userRepo, cfg))
+	authHandler := auth.NewHandler(auth.NewService(userRepo, auth.NewSessionRepository(db), cfg))
 	historyHandler := watch_history.NewHandler(watch_history.NewService(watch_history.NewRepository(db)))
 	catalogHandler := catalog.NewHandler(catalog.NewService(catalog.NewRepository(db)))
 	engagementHandler := engagement.NewHandler(engagement.NewService(engagement.NewRepository(db)))
