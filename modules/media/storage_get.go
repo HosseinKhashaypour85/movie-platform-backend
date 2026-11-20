@@ -1,6 +1,7 @@
 package media
 
 import (
+	"encoding/hex"
 	"errors"
 	"strings"
 	"time"
