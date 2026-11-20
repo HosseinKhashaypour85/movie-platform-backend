@@ -1,0 +1,26 @@
+meta {
+  name: Save Movie Progress
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/api/v1/watch-history/1
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "progress_seconds": 1200,
+  "duration_seconds": 7200
+}
+}

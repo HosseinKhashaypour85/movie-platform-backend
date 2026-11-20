@@ -1,0 +1,15 @@
+meta {
+  name: Serve Ads By Placement
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/ads
+  body: none
+  auth: none
+}
+
+params:query {
+  placement: player_pre_roll
+}

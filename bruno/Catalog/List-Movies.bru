@@ -1,0 +1,16 @@
+meta {
+  name: List Published Movies
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/catalog/movies
+  body: none
+  auth: none
+}
+
+params:query {
+  offset: 0
+  limit: 20
+}

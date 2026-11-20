@@ -1,0 +1,27 @@
+meta {
+  name: Queue Subtitle AI Job
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/media/subtitle-jobs
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "source_asset_id": 1,
+  "source_language": "en",
+  "target_language": "fa"
+}
+}

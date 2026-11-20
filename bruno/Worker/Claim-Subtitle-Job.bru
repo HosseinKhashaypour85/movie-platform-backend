@@ -1,0 +1,15 @@
+meta {
+  name: Claim Next Subtitle Job
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/internal/v1/worker/subtitle-jobs/claim
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{workerToken}}
+}

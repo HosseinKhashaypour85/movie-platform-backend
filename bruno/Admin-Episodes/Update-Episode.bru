@@ -1,0 +1,31 @@
+meta {
+  name: Update Episode
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/api/v1/admin/episodes/1
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "season_id": 1,
+  "number": 1,
+  "title": "Pilot (Final Cut)",
+  "synopsis": "Walter White turns to cooking methamphetamine...",
+  "duration_minutes": 58,
+  "thumbnail_url": "https://example.com/episodes/pilot.jpg",
+  "is_published": true
+}
+}

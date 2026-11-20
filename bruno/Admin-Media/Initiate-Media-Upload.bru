@@ -1,0 +1,28 @@
+meta {
+  name: Initiate Presigned S3 Upload
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/media/uploads
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "target_type": "movie",
+  "target_id": 1,
+  "kind": "video",
+  "content_type": "video/mp4"
+}
+}

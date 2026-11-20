@@ -1,0 +1,25 @@
+meta {
+  name: Logout Current Session
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/logout
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "refresh_token": "YOUR_REFRESH_TOKEN_HERE"
+}
+}

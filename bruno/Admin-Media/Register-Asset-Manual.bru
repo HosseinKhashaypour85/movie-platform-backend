@@ -1,0 +1,29 @@
+meta {
+  name: Register Asset Manually
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/media/assets
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "movie_id": 1,
+  "kind": "video",
+  "storage_key": "movies/1/video/hls/master.m3u8",
+  "playback_url": "https://cdn.example.com/movies/1/video/hls/master.m3u8",
+  "mime_type": "video/mp4"
+}
+}

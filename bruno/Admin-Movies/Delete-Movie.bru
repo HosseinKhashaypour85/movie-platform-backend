@@ -1,0 +1,15 @@
+meta {
+  name: Delete Movie
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/admin/movies/1
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

@@ -1,0 +1,27 @@
+meta {
+  name: Update Season
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/api/v1/admin/seasons/1
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "series_id": 1,
+  "number": 1,
+  "title": "Season 1 (Extended)"
+}
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Complete S3 Upload
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/media/uploads/complete
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "target_type": "movie",
+  "target_id": 1,
+  "kind": "video",
+  "storage_key": "movies/1/video/2026/11/abc123456789.mp4"
+}
+}

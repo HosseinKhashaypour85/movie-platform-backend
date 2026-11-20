@@ -1,0 +1,28 @@
+meta {
+  name: Broadcast Notification
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/notifications/broadcast
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "title": "Welcome to the Platform!",
+  "body": "Stream unlimited 4K HDR movies and series with full Persian subtitles.",
+  "type": "general",
+  "action_url": "https://movieplatform.com"
+}
+}

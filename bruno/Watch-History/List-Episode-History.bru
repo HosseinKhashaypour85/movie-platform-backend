@@ -1,0 +1,20 @@
+meta {
+  name: List Episode Watch History
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/watch-history/episodes
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 20
+  offset: 0
+}
+
+auth:bearer {
+  token: {{token}}
+}

@@ -1,0 +1,25 @@
+meta {
+  name: Rate Movie
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/movies/1/ratings
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "score": 9
+}
+}

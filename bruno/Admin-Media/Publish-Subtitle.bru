@@ -1,0 +1,25 @@
+meta {
+  name: Publish / Unpublish Subtitle
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/admin/media/subtitles/1/publish
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "is_published": true
+}
+}

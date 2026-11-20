@@ -1,0 +1,33 @@
+meta {
+  name: Create Ad Campaign
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/ads
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "name": "Summer Blockbuster Campaign",
+  "placement": "player_pre_roll",
+  "format": "video",
+  "media_url": "https://cdn.example.com/ads/promo.mp4",
+  "click_url": "https://example.com/deal",
+  "advertiser": "Sponsor Brand",
+  "is_active": true,
+  "starts_at": "2026-06-01T00:00:00Z",
+  "ends_at": "2026-08-31T23:59:59Z"
+}
+}

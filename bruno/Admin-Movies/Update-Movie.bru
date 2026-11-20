@@ -1,0 +1,37 @@
+meta {
+  name: Update Movie
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/api/v1/admin/movies/1
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "title": "Inception (Updated)",
+  "original_title": "Inception",
+  "slug": "inception-2010",
+  "synopsis": "A mind-bending sci-fi thriller...",
+  "release_year": 2010,
+  "duration_minutes": 148,
+  "age_rating": "PG-13",
+  "poster_url": "https://example.com/posters/inception.jpg",
+  "backdrop_url": "https://example.com/backdrops/inception.jpg",
+  "language": "English",
+  "country": "United States",
+  "imdb_rating": 8.8,
+  "is_published": true
+}
+}

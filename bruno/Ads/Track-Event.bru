@@ -1,0 +1,22 @@
+meta {
+  name: Track Ad Event
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/ads/1/events
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+{
+  "type": "impression",
+  "placement": "player_pre_roll"
+}
+}

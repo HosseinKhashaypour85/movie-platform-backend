@@ -1,0 +1,33 @@
+meta {
+  name: Update Ad Campaign
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/api/v1/admin/ads/1
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "name": "Summer Blockbuster Campaign (Extended)",
+  "placement": "player_pre_roll",
+  "format": "video",
+  "media_url": "https://cdn.example.com/ads/promo.mp4",
+  "click_url": "https://example.com/deal",
+  "advertiser": "Sponsor Brand",
+  "is_active": true,
+  "starts_at": "2026-06-01T00:00:00Z",
+  "ends_at": "2026-09-30T23:59:59Z"
+}
+}

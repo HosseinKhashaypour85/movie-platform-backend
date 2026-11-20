@@ -1,0 +1,37 @@
+meta {
+  name: Create Series
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/series
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+{
+  "title": "Breaking Bad",
+  "original_title": "Breaking Bad",
+  "slug": "breaking-bad",
+  "synopsis": "A chemistry teacher diagnosed with lung cancer...",
+  "release_year": 2008,
+  "end_year": 2013,
+  "age_rating": "TV-MA",
+  "poster_url": "https://example.com/posters/bb.jpg",
+  "backdrop_url": "https://example.com/backdrops/bb.jpg",
+  "language": "English",
+  "country": "United States",
+  "imdb_rating": 9.5,
+  "is_published": true
+}
+}
