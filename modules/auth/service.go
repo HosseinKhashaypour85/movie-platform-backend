@@ -20,11 +20,14 @@ var (
 )
 
 type Service struct {
-	Users  *users.Repository
+	Users *users.Repository
+	Sessions *SessionRepository
 	Config config.Config
 }
 
-func NewService(u *users.Repository, c config.Config) *Service { return &Service{Users: u, Config: c} }
+func NewService(u *users.Repository, sessions *SessionRepository, c config.Config) *Service {
+	return &Service{Users: u, Sessions: sessions, Config: c}
+}
 func validate(name, email, password string) error {
 	name = strings.TrimSpace(name)
 	email = strings.ToLower(strings.TrimSpace(email))
@@ -58,12 +61,16 @@ func (s *Service) Register(name, email, password string) (*users.User, error) {
 	return u, nil
 }
 func (s *Service) Login(email, password string) (string, *users.User, error) {
+	return s.LoginWithSession(email, password, "", "")
+}
+
+func (s *Service) LoginWithSession(email, password, userAgent, ip string) (string, string, *users.User, error) {
 	u, e := s.Users.FindByEmail(strings.ToLower(strings.TrimSpace(email)))
 	if e != nil {
-		return "", nil, ErrInvalidCredentials
+		return "", "", nil, ErrInvalidCredentials
 	}
 	if !u.IsActive || bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)) != nil {
-		return "", nil, ErrInvalidCredentials
+		return "", "", nil, ErrInvalidCredentials
 	}
 	now := time.Now()
 	c := jwt.MapClaims{"user_id": u.ID, "role": u.Role, "iss": s.Config.JWTIssuer, "sub": fmt.Sprint(u.ID), "iat": now.Unix(), "exp": now.Add(s.Config.JWTTTL).Unix()}
@@ -72,5 +79,7 @@ func (s *Service) Login(email, password string) (string, *users.User, error) {
 	if e != nil {
 		return "", nil, e
 	}
-	return signed, u, nil
+	refresh, err := s.Sessions.Create(u.ID, userAgent, ip)
+	if err != nil { return "", "", nil, err }
+	return signed, refresh, u, nil
 }
