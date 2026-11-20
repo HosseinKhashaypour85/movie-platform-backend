@@ -45,7 +45,7 @@ func main() {
 	defer sqlDB.Close()
 
 	if cfg.Environment != "production" {
-		if err := db.AutoMigrate(&users.User{}, &auth.Session{}, &watch_history.WatchHistory{}, &catalog.Genre{}, &catalog.Movie{}, &catalog.Series{}, &catalog.Season{}, &catalog.Episode{}, &engagement.Favorite{}, &engagement.Rating{}, &admin.AuditLog{}); err != nil {
+		if err := db.AutoMigrate(&users.User{}, &auth.Session{}, &watch_history.EpisodeWatchHistory{}, &watch_history.WatchHistory{}, &catalog.Genre{}, &catalog.Movie{}, &catalog.Series{}, &catalog.Season{}, &catalog.Episode{}, &engagement.Favorite{}, &engagement.Rating{}, &admin.AuditLog{}); err != nil {
 			logger.Error("migration failed", "error", err)
 			os.Exit(1)
 		}
