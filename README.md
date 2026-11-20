@@ -157,3 +157,18 @@ This is a provider-neutral Go reference implementation, not a vendor edge
 deployment. A CDN-specific adapter/worker, credentialed CORS configuration,
 private-origin rules and real-device end-to-end tests are still required
 before production. Do not expose the middleware's signing key to clients.
+
+
+## Private HLS media gateway
+
+Run the standalone gateway process separately from the API:
+
+```bash
+go run ./cmd/media-gateway
+```
+
+It requires the same private-bucket `S3_*` settings used by the upload/transcode services and the same `PLAYBACK_SIGNING_KEY` used by the API. It listens on `:8090` by default; set `MEDIA_GATEWAY_PORT` to override the port. Route the configured `PLAYBACK_CDN_BASE_URL` to this service over HTTPS (normally through a CDN/reverse proxy). The gateway validates the signed manifest request and scoped playback cookie before fetching an object from S3. Origin URLs are generated and consumed server-side and are never returned to the player. GET and HEAD are supported; byte-range headers are forwarded for seeking, and HLS objects are streamed rather than buffered in memory.
+
+Keep the bucket private and use a dedicated gateway IAM identity with read-only access to only the HLS output prefix. The API/transcoder credentials should remain separate and have only the permissions each service requires. Do not expose the gateway directly to the public internet without TLS, exact-origin credentialed CORS, request-rate controls and network restrictions. Configure the player to send cookies/credentials on cross-origin manifest, playlist and segment requests. CDN caching must not cache authorization decisions or responses across users; start with private/no-store behavior until a cookie-aware cache policy has been explicitly reviewed.
+
+The gateway is a reference self-hosted origin service, not a vendor-specific CDN worker. Production rollout still requires deployment-level TLS/CORS/rate-limit configuration, private-origin network policy, real S3-compatible integration tests, and Flutter device playback validation (including seeking and ABR).
