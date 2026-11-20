@@ -109,10 +109,5 @@ to object storage using that method and header. Supported content types are
 MP4 video and JPEG/PNG/WebP images. The upload URL is signed with AWS Signature
 Version 4 and binds the HTTP method, object path, expiry, host and content type.
 
-This endpoint only issues upload URLs. It does not yet verify object existence,
-enforce a maximum upload size, create the `media_assets` database row, scan
-uploads, or transcode source video into HLS. Do not expose uploaded objects
-publicly. A follow-up asset-finalization workflow must verify the uploaded
-object (HEAD), inspect actual size and MIME type, and then create the asset
-record. Configure bucket CORS to allow PUT from the admin web origin and
+After the PUT succeeds, finalize the upload with `POST /api/v1/admin/media/uploads/complete` using the same `target_type`, `target_id`, `kind`, and returned `storage_key`. The API signs a HEAD request to the private bucket, checks the stored content type and size (2 GiB maximum for MP4, 20 MiB for images), and creates an inactive media asset. Repeated finalization is rejected. The asset remains inactive until a trusted processing worker has generated and verified HLS output; the current endpoint does not scan files or transcode source video. Do not expose uploaded objects publicly. Configure bucket CORS to allow PUT from the admin web origin and
 restrict IAM credentials to the intended bucket/prefix and required actions.
