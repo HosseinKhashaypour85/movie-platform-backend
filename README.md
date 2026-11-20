@@ -124,3 +124,36 @@ files are removed after processing; configure `TRANSCODE_TEMP_DIR` on a
 volume with sufficient free disk (at least the source size plus output space).
 
 Install FFmpeg with libx264 support and `ffprobe` in the worker image. The worker is a separate process from the API; do not run it in the public HTTP request path. It probes source dimensions and creates only renditions that do not upscale the source: 360p, 480p, 720p and 1080p. The HLS master playlist references each available variant, allowing compatible players to switch quality based on measured bandwidth and buffer health. Variant playlists and segments are uploaded under the same private, unique asset prefix; the active media asset points to `master.m3u8`. The CDN edge must still enforce signed playback authorization for the master manifest, every variant playlist/segment, and any keys (for example through signed cookies or manifest rewriting). This worker does not yet create thumbnails, scan for malware, or automatically delete source files.
+
+## Provider-agnostic HLS edge authorization
+
+The `modules/media` package includes `HLSCookieMiddleware`, a reference
+authorization layer that does not depend on Cloudflare, Bunny, or another CDN
+vendor. Mount it in a trusted Go media gateway/reverse proxy in front of the
+private object-storage origin:
+
+```go
+edge := media.HLSCookieMiddleware(media.EdgeAuthConfig{
+    SigningKey: []byte(os.Getenv("PLAYBACK_SIGNING_KEY")),
+})(privateStorageHandler)
+```
+
+The first request uses the signed manifest URL (`scope`, `expires`,
+`signature`). The middleware validates the signature and expiry, then
+exchanges it for a short-lived `Secure; HttpOnly; SameSite=None` cookie
+restricted to the signed asset directory. Variant playlists, segments and
+keys must all pass through the same middleware; the browser/player sends the
+cookie on subsequent requests. Requests outside the signed directory,
+expired tokens, malformed signatures and noncanonical paths are rejected.
+
+The gateway must share the dedicated `PLAYBACK_SIGNING_KEY` with the API,
+serve media over HTTPS, keep the storage origin private, and avoid caching
+authorization responses or leaking signed URLs. For browser-based players,
+configure credentialed CORS for the exact application origin and ensure the
+player sends credentials; third-party-cookie restrictions may affect browser
+playback. Native players should be configured to retain and send cookies.
+
+This is a provider-neutral Go reference implementation, not a vendor edge
+deployment. A CDN-specific adapter/worker, credentialed CORS configuration,
+private-origin rules and real-device end-to-end tests are still required
+before production. Do not expose the middleware's signing key to clients.
