@@ -32,7 +32,7 @@ Create database and dedicated least-privilege account. For production, use TLS t
 - GET /health/live
 - GET /health/ready
 - POST /api/v1/auth/register
-- POST /api/v1/auth/login
+- POST /api/v1/auth/login (returns short-lived access token and rotating refresh token)\n- POST /api/v1/auth/refresh\n- POST /api/v1/auth/logout (Bearer token + refresh token)\n- POST /api/v1/auth/logout-all (Bearer token)
 - GET /api/v1/profile (Bearer token)
 - GET /api/v1/watch-history (Bearer token)
 - PUT /api/v1/watch-history/{movieID} (Bearer token)
