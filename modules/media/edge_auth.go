@@ -52,7 +52,7 @@ func HLSCookieMiddleware(cfg EdgeAuthConfig) func(http.Handler) http.Handler {
 				http.SetCookie(w, &http.Cookie{
 					Name: cookieName, Value: value, Path: scope,
 					MaxAge: remaining, Expires: time.Unix(expires, 0).UTC(),
-					Secure: true, HttpOnly: true, SameSite: http.SameSiteLaxMode,
+					Secure: true, HttpOnly: true, SameSite: http.SameSiteNoneMode,
 				})
 				next.ServeHTTP(w, r)
 				return
