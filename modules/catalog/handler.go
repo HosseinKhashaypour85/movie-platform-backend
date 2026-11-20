@@ -54,7 +54,7 @@ func (h *Handler) Movie(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Series(w http.ResponseWriter, r *http.Request) {
-	rows, total, err := h.Service.SeriesList(r.URL.Query().Get("q"), intParam(r, "limit"), intParam(r, "offset"))
+	rows, total, err := h.Service.SeriesList(r.URL.Query().Get("q"), uintParam(r, "genre_id"), uint16(uintParam(r, "year")), intParam(r, "limit"), intParam(r, "offset"))
 	if err != nil {
 		httpx.Error(w, 400, "invalid_query", "invalid catalog query")
 		return
@@ -106,4 +106,10 @@ func (h *Handler) Episodes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.JSON(w, 200, map[string]any{"items": rows})
+}
+
+func (h *Handler) Genres(w http.ResponseWriter, r *http.Request) {
+	rows, err := h.Service.Genres()
+	if err != nil { httpx.Error(w,500,"internal_error","internal server error"); return }
+	httpx.JSON(w,200,map[string]any{"items":rows})
 }
