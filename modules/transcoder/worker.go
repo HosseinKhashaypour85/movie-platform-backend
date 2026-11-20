@@ -56,8 +56,7 @@ func (w *Worker) claim(ctx context.Context) (*media.TranscodeJob, error) {
 	now:=time.Now().UTC()
 	err:=w.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err:=tx.Clauses(clause.Locking{Strength:"UPDATE",Options:"SKIP LOCKED"}).
-			Where("status = ? OR (status = ? AND locked_at < ?)","queued","processing",now.Add(-2*time.Hour)).
-			Where("attempts < ?",3).Order("id ASC").First(&job).Error; err!=nil { return err }
+			Where("(status = ? AND attempts < ?) OR (status = ? AND locked_at < ?)","queued",3,"processing",now.Add(-2*time.Hour)).Order("id ASC").First(&job).Error; err!=nil { return err }
 		return tx.Model(&job).Updates(map[string]any{"status":"processing","locked_at":now,"attempts":gorm.Expr("attempts + 1")}).Error
 	})
 	if errors.Is(err,gorm.ErrRecordNotFound) { return nil,nil }
@@ -105,14 +104,18 @@ func (w *Worker) process(ctx context.Context, job *media.TranscodeJob) error {
 	var random [12]byte
 	if _,err:=rand.Read(random[:]); err!=nil { return err }
 	prefix:=fmt.Sprintf("hls/%d/%s",source.ID,hex.EncodeToString(random[:]))
+	var totalOutputBytes uint64
 	for _,file:=range files {
+		info,statErr:=os.Stat(file)
+		if statErr!=nil { return statErr }
+		totalOutputBytes += uint64(info.Size())
 		name:=filepath.Base(file)
 		contentType:="video/mp2t"
 		if name=="index.m3u8" { contentType="application/vnd.apple.mpegurl" }
 		if err:=w.upload(ctx,prefix+"/"+name,file,contentType); err!=nil { return err }
 	}
 	outputKey:=prefix+"/index.m3u8"
-	output:=media.Asset{MovieID:source.MovieID,EpisodeID:source.EpisodeID,Kind:"video",StorageKey:outputKey,MimeType:"application/vnd.apple.mpegurl",SizeBytes:uint64(len(playlistBytes)),IsActive:true}
+	output:=media.Asset{MovieID:source.MovieID,EpisodeID:source.EpisodeID,Kind:"video",StorageKey:outputKey,MimeType:"application/vnd.apple.mpegurl",SizeBytes:totalOutputBytes,IsActive:true}
 	return w.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err:=tx.Create(&output).Error; err!=nil { return err }
 		return tx.Model(job).Updates(map[string]any{"status":"completed","error_message":"","locked_at":nil}).Error
