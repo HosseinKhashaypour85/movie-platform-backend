@@ -30,12 +30,18 @@ func (g *gateway) serveObject(w http.ResponseWriter, r *http.Request) {
 
 	// PresignGet creates a short-lived origin URL. It is used only server-side;
 	// the client never receives or gets redirected to the storage URL.
-	originURL, err := g.storage.PresignGet(key, time.Now().UTC(), 60*time.Second)
+	var originURL string
+	var err error
+	if r.Method == http.MethodHead {
+		originURL, err = g.storage.PresignHead(key, time.Now().UTC(), 60*time.Second)
+	} else {
+		originURL, err = g.storage.PresignGet(key, time.Now().UTC(), 60*time.Second)
+	}
 	if err != nil {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
-	req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, originURL, nil)
+	req, err := http.NewRequestWithContext(r.Context(), r.Method, originURL, nil)
 	if err != nil {
 		http.Error(w, "bad gateway", http.StatusBadGateway)
 		return
