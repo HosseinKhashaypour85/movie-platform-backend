@@ -16,12 +16,11 @@ import (
 	"movie-platform/internal/middleware"
 	"movie-platform/modules/admin"
 	"movie-platform/modules/ads"
-	"movie-platform/modules/media"
-	"movie-platform/modules/notifications"
-	"movie-platform/modules/ads"
 	"movie-platform/modules/auth"
 	"movie-platform/modules/catalog"
 	"movie-platform/modules/engagement"
+	"movie-platform/modules/media"
+	"movie-platform/modules/notifications"
 	"movie-platform/modules/users"
 	"movie-platform/modules/watch_history"
 
@@ -49,7 +48,26 @@ func main() {
 	defer sqlDB.Close()
 
 	if cfg.Environment != "production" {
-		if err := db.AutoMigrate(&users.User{}, &auth.Session{}, &ads.Campaign{}, &ads.Event{}, &watch_history.WatchHistory{}, &catalog.Genre{}, &catalog.Movie{}, &catalog.Series{}, &catalog.Season{}, &catalog.Episode{}, &engagement.Favorite{}, &engagement.Rating{}, &admin.AuditLog{}); err != nil {
+		if err := db.AutoMigrate(
+			&users.User{},
+			&auth.Session{},
+			&ads.Campaign{},
+			&ads.Event{},
+			&media.Asset{},
+			&media.Subtitle{},
+			&media.SubtitleJob{},
+			&notifications.Notification{},
+			&watch_history.WatchHistory{},
+			&watch_history.EpisodeWatchHistory{},
+			&catalog.Genre{},
+			&catalog.Movie{},
+			&catalog.Series{},
+			&catalog.Season{},
+			&catalog.Episode{},
+			&engagement.Favorite{},
+			&engagement.Rating{},
+			&admin.AuditLog{},
+		); err != nil {
 			logger.Error("migration failed", "error", err)
 			os.Exit(1)
 		}
@@ -65,32 +83,44 @@ func main() {
 	adsHandler := ads.NewHandler(db)
 	mediaHandler := media.NewHandler(db)
 	notificationHandler := notifications.NewHandler(db)
-	adsHandler := ads.NewHandler(db)
 
 	router := chi.NewRouter()
-	router.Use(middleware.RequestID, middleware.Recover(logger), middleware.SecurityHeaders, middleware.BodyLimit(1<<20), middleware.Timeout(15*time.Second), middleware.RateLimit(120, time.Minute), middleware.CORS(cfg.AllowedOrigins))
+	router.Use(
+		middleware.RequestID,
+		middleware.Recover(logger),
+		middleware.SecurityHeaders,
+		middleware.BodyLimit(1<<20),
+		middleware.Timeout(15*time.Second),
+		middleware.RateLimit(120, time.Minute),
+		middleware.CORS(cfg.AllowedOrigins),
+	)
+
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		httpx.JSON(w, 200, map[string]string{"service": "movie-platform-api", "status": "running"})
+		httpx.JSON(w, http.StatusOK, map[string]string{"service": "movie-platform-api", "status": "running"})
 	})
-	router.Get("/health/live", func(w http.ResponseWriter, r *http.Request) { httpx.JSON(w, 200, map[string]string{"status": "alive"}) })
+	router.Get("/health/live", func(w http.ResponseWriter, r *http.Request) {
+		httpx.JSON(w, http.StatusOK, map[string]string{"status": "alive"})
+	})
 	router.Get("/health/ready", func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
 		if err := sqlDB.PingContext(ctx); err != nil {
-			httpx.Error(w, 503, "not_ready", "dependencies unavailable")
+			httpx.Error(w, http.StatusServiceUnavailable, "not_ready", "dependencies unavailable")
 			return
 		}
-		httpx.JSON(w, 200, map[string]string{"status": "ready"})
+		httpx.JSON(w, http.StatusOK, map[string]string{"status": "ready"})
 	})
 
-	router.Route("/internal/v1", func(r chi.Router) { media.RegisterWorkerRoutes(r, mediaHandler) })
+	router.Route("/internal/v1", func(r chi.Router) {
+		media.RegisterWorkerRoutes(r, mediaHandler)
+	})
+
 	router.Route("/api/v1", func(r chi.Router) {
 		auth.RegisterRoutes(r, authHandler)
 		catalog.RegisterRoutes(r, catalogHandler)
 		ads.RegisterPublicRoutes(r, adsHandler)
 		media.RegisterPublicRoutes(r, mediaHandler)
 		engagement.RegisterPublicRoutes(r, engagementHandler)
-		ads.RegisterPublicRoutes(r, adsHandler)
 
 		r.Group(func(protected chi.Router) {
 			protected.Use(middleware.Auth(cfg.JWTSecret, cfg.JWTIssuer))
@@ -98,19 +128,26 @@ func main() {
 			ads.RegisterAdminRoutes(protected, adsHandler)
 			media.RegisterAdminRoutes(protected, mediaHandler)
 			notifications.RegisterAdminRoutes(protected, notificationHandler)
-			ads.RegisterAdminRoutes(protected, adsHandler)
 		})
 
 		r.Group(func(p chi.Router) {
 			p.Use(middleware.Auth(cfg.JWTSecret, cfg.JWTIssuer))
 			users.RegisterRoutes(p, userHandler)
-			notifications.RegisterUserRoutes(p, notificationHandler)
 			watch_history.RegisterRoutes(p, historyHandler)
+			notifications.RegisterUserRoutes(p, notificationHandler)
 			engagement.RegisterProtectedRoutes(p, engagementHandler)
 		})
 	})
 
-	server := &http.Server{Addr: ":" + cfg.Port, Handler: router, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 1 << 20}
+	server := &http.Server{
+		Addr:              ":" + cfg.Port,
+		Handler:           router,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		MaxHeaderBytes:    1 << 20,
+	}
 	go func() {
 		logger.Info("server starting", "addr", server.Addr)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -118,9 +155,11 @@ func main() {
 			os.Exit(1)
 		}
 	}()
+
 	stop, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 	<-stop.Done()
+
 	ctx, done := context.WithTimeout(context.Background(), 10*time.Second)
 	defer done()
 	if err := server.Shutdown(ctx); err != nil {
