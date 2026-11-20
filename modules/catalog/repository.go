@@ -57,7 +57,7 @@ func (r *Repository) ListSeries(query string, genreID uint, year uint16, limit, 
 	if year > 0 { tx = tx.Where("release_year = ?", year) }
 	if genreID > 0 { tx = tx.Joins("JOIN series_genres ON series_genres.series_id = series.id").Where("series_genres.genre_id = ?", genreID) }
 	var total int64
-	if err := tx.Session(&gorm.Session{}).Distinct("series.id").Count(&total).Error != nil {
+	if err := tx.Session(&gorm.Session{}).Distinct("series.id").Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 	var rows []Series
