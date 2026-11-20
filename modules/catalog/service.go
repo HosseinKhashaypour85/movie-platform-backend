@@ -19,11 +19,11 @@ func (s *Service) Movie(id uint) (*Movie, error) {
 	}
 	return s.Repo.MovieByID(id)
 }
-func (s *Service) SeriesList(q string, l, o int) ([]Series, int64, error) {
+func (s *Service) SeriesList(q string, g uint, y uint16, l, o int) ([]Series, int64, error) {
 	if l > 100 || o < 0 {
 		return nil, 0, ErrInvalidID
 	}
-	return s.Repo.ListSeries(q, l, o)
+	return s.Repo.ListSeries(q, g, y, l, o)
 }
 func (s *Service) SeriesItem(id uint) (*Series, error) {
 	if id == 0 {
@@ -43,3 +43,5 @@ func (s *Service) Episodes(id uint) ([]Episode, error) {
 	}
 	return s.Repo.Episodes(id)
 }
+
+func (s *Service) Genres() ([]Genre, error) { return s.Repo.Genres() }
