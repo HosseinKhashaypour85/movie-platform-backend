@@ -1,0 +1,59 @@
+﻿{
+  "name": "Complete Subtitle Job",
+  "category": "Worker",
+  "method": "POST",
+  "path": "/internal/v1/worker/subtitle-jobs/{id}/complete",
+  "url": "http://localhost:8080/internal/v1/worker/subtitle-jobs/1/complete",
+  "description": "ثبت اتمام موفق پردازش جاب همراه با لینک فایل زیرنویس تولید شده یا ثبت خطا",
+  "auth": {
+    "required": true,
+    "type": "worker_token",
+    "description": "نیازمند SUBTITLE_WORKER_TOKEN"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_WORKER_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 1,
+      "description": "شناسه جاب"
+    }
+  },
+  "query_params": {},
+  "request_body": {
+    "download_url": "https://storage.example.com/subtitles/job1_fa.vtt",
+    "error_message": "",
+    "status": "completed"
+  },
+  "request_fields": {
+    "download_url": {
+      "type": "string",
+      "required": false,
+      "description": "آدرس دانلود فایل نهایی زیرنویس در صورت موفقیت"
+    },
+    "error_message": {
+      "type": "string",
+      "required": false,
+      "description": "پیام خطا در صورت شکست"
+    },
+    "status": {
+      "type": "string",
+      "required": true,
+      "description": "'completed' یا 'failed'"
+    }
+  },
+  "response_example": {
+    "status": 200,
+    "body": {
+      "message": "job completed and subtitle registered"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X POST \"http://localhost:8080/internal/v1/worker/subtitle-jobs/1/complete\" \\\n  -H \"Authorization: Bearer <YOUR_WORKER_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"status\":\"completed\",\"download_url\":\"https://storage.example.com/subtitles/job1_fa.vtt\",\"error_message\":\"\"}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/internal/v1/worker/subtitle-jobs/1/complete\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + workerToken, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ status: \"completed\", download_url: \"https://storage.example.com/subtitles/job1_fa.vtt\", error_message: \"\" })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Worker/Complete-Subtitle-Job.bru"
+  }
+}

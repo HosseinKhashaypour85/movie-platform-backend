@@ -1,0 +1,85 @@
+﻿{
+  "name": "Update Movie",
+  "category": "Admin-Movies",
+  "method": "PUT",
+  "path": "/api/v1/admin/movies/{id}",
+  "url": "http://localhost:8080/api/v1/admin/movies/2",
+  "description": "ویرایش مشخصات فیلم موجود با شناسه ID",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 2,
+      "description": "شناسه فیلم"
+    }
+  },
+  "query_params": {},
+  "request_body": {
+    "duration_minutes": 169,
+    "genre_id": 1,
+    "is_published": true,
+    "release_year": 2014,
+    "slug": "interstellar-imax",
+    "synopsis": "Updated synopsis...",
+    "title": "Interstellar (IMAX)"
+  },
+  "request_fields": {
+    "duration_minutes": {
+      "type": "integer",
+      "required": true,
+      "description": "مدت زمان به دقیقه"
+    },
+    "genre_id": {
+      "type": "integer",
+      "required": true,
+      "description": "شناسه ژانر"
+    },
+    "is_published": {
+      "type": "boolean",
+      "required": true,
+      "description": "وضعیت انتشار"
+    },
+    "release_year": {
+      "type": "integer",
+      "required": true,
+      "description": "سال ساخت"
+    },
+    "slug": {
+      "type": "string",
+      "required": true,
+      "description": "اسلاگ"
+    },
+    "synopsis": {
+      "type": "string",
+      "required": false,
+      "description": "خلاصه داستان"
+    },
+    "title": {
+      "type": "string",
+      "required": true,
+      "description": "عنوان فیلم"
+    }
+  },
+  "response_example": {
+    "status": 200,
+    "body": {
+      "id": 2,
+      "slug": "interstellar-imax",
+      "title": "Interstellar (IMAX)"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X PUT \"http://localhost:8080/api/v1/admin/movies/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"title\":\"Interstellar (IMAX)\",\"slug\":\"interstellar-imax\",\"release_year\":2014,\"duration_minutes\":169,\"genre_id\":1,\"is_published\":true}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/movies/2\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ title: \"Interstellar (IMAX)\", slug: \"interstellar-imax\", release_year: 2014, duration_minutes: 169, genre_id: 1, is_published: true })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Movies/Update-Movie.bru"
+  }
+}

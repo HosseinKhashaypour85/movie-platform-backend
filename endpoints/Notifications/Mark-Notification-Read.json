@@ -1,0 +1,38 @@
+﻿{
+  "name": "Mark Notification As Read",
+  "category": "Notifications",
+  "method": "PATCH",
+  "path": "/api/v1/notifications/{id}/read",
+  "url": "http://localhost:8080/api/v1/notifications/1/read",
+  "description": "علامت‌گذاری یک اعلان مشخص به عنوان خوانده شده",
+  "auth": {
+    "required": true,
+    "type": "bearer_user",
+    "description": "نیازمند توکن کاربر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+  },
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 1,
+      "description": "شناسه اعلان"
+    }
+  },
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "message": "notification marked as read"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X PATCH \"http://localhost:8080/api/v1/notifications/1/read\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/notifications/1/read\", {\n  method: \"PATCH\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Notifications/Mark-Notification-Read.bru"
+  }
+}

@@ -1,0 +1,48 @@
+﻿{
+  "name": "List All Ad Campaigns",
+  "category": "Admin-Ads",
+  "method": "GET",
+  "path": "/api/v1/ads",
+  "url": "http://localhost:8080/api/v1/ads",
+  "description": "لیست کامل کمپین‌های تبلیغاتی شامل کمپین‌های فعال، منقضی شده یا پیش‌نویس",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+  },
+  "url_params": {},
+  "query_params": {
+    "placement": {
+      "type": "string",
+      "required": false,
+      "description": "فیلتر بر اساس جایگاه"
+    }
+  },
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "click_url": "https://brand.test",
+          "end_at": "2026-08-31T23:59:59Z",
+          "id": 1,
+          "is_active": true,
+          "media_url": "https://cdn.example.com/ad.mp4",
+          "placement": "preroll",
+          "start_at": "2026-06-01T00:00:00Z",
+          "title": "Summer Campaign"
+        }
+      ]
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/ads\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/ads\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Ads/List-Campaigns.bru"
+  }
+}

@@ -1,0 +1,31 @@
+﻿{
+  "name": "Mark All Notifications As Read",
+  "category": "Notifications",
+  "method": "POST",
+  "path": "/api/v1/notifications/read-all",
+  "url": "http://localhost:8080/api/v1/notifications/read-all",
+  "description": "علامت‌گذاری همزمان تمام اعلان‌های خوانده نشده به عنوان خوانده شده",
+  "auth": {
+    "required": true,
+    "type": "bearer_user",
+    "description": "نیازمند توکن کاربر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "message": "all notifications marked as read"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X POST \"http://localhost:8080/api/v1/notifications/read-all\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/notifications/read-all\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Notifications/Mark-All-Read.bru"
+  }
+}

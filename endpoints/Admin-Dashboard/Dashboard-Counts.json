@@ -1,0 +1,35 @@
+﻿{
+  "name": "Admin Dashboard Counts",
+  "category": "Admin-Dashboard",
+  "method": "GET",
+  "path": "/api/v1/admin/dashboard",
+  "url": "http://localhost:8080/api/v1/admin/dashboard",
+  "description": "دریافت آمار کلی پنل مدیریت: تعداد کل کاربران، فیلم‌ها، سریال‌ها، قسمت‌ها و تبلیغات",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر (Admin/Super Admin)"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "active_ad_campaigns": 8,
+      "total_episodes": 480,
+      "total_movies": 320,
+      "total_series": 45,
+      "total_users": 1500
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/admin/dashboard\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/dashboard\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Dashboard/Dashboard-Counts.bru"
+  }
+}

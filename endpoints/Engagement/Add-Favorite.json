@@ -1,0 +1,38 @@
+﻿{
+  "name": "Add Movie To Favorites",
+  "category": "Engagement",
+  "method": "PUT",
+  "path": "/api/v1/favorites/{movieID}",
+  "url": "http://localhost:8080/api/v1/favorites/1",
+  "description": "افزودن یک فیلم به لیست علاقه‌مندی‌های کاربر",
+  "auth": {
+    "required": true,
+    "type": "bearer_user",
+    "description": "نیازمند توکن کاربر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+  },
+  "url_params": {
+    "movieID": {
+      "type": "integer",
+      "required": true,
+      "example": 1,
+      "description": "شناسه فیلم"
+    }
+  },
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "message": "movie added to favorites"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X PUT \"http://localhost:8080/api/v1/favorites/1\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/favorites/1\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Engagement/Add-Favorite.bru"
+  }
+}

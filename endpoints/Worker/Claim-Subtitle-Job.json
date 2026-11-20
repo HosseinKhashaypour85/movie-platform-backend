@@ -1,0 +1,38 @@
+﻿{
+  "name": "Claim Next Subtitle Job",
+  "category": "Worker",
+  "method": "POST",
+  "path": "/internal/v1/worker/subtitle-jobs/claim",
+  "url": "http://localhost:8080/internal/v1/worker/subtitle-jobs/claim",
+  "description": "تحویل گرفتن و قفل کردن جاب بعدی تولید زیرنویس از صف پردازش توسط ورکر",
+  "auth": {
+    "required": true,
+    "type": "worker_token",
+    "description": "نیازمند SUBTITLE_WORKER_TOKEN در هدر Bearer"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_WORKER_TOKEN>"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "job": {
+        "id": 1,
+        "source_asset_id": 1,
+        "source_language": "en",
+        "status": "processing",
+        "target_language": "fa"
+      },
+      "source_video_url": "https://s3.example.com/download/source.mp4?..."
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X POST \"http://localhost:8080/internal/v1/worker/subtitle-jobs/claim\" \\\n  -H \"Authorization: Bearer <YOUR_WORKER_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/internal/v1/worker/subtitle-jobs/claim\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + workerToken }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Worker/Claim-Subtitle-Job.bru"
+  }
+}

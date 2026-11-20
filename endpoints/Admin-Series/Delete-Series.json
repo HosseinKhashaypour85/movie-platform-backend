@@ -1,0 +1,38 @@
+﻿{
+  "name": "Delete Series",
+  "category": "Admin-Series",
+  "method": "DELETE",
+  "path": "/api/v1/admin/series/{id}",
+  "url": "http://localhost:8080/api/v1/admin/series/2",
+  "description": "حذف کامل یک سریال و فصل‌ها و قسمت‌های وابسته به آن",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+  },
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 2,
+      "description": "شناسه سریال"
+    }
+  },
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "message": "series deleted successfully"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X DELETE \"http://localhost:8080/api/v1/admin/series/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/series/2\", {\n  method: \"DELETE\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Series/Delete-Series.bru"
+  }
+}

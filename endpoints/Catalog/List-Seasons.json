@@ -1,0 +1,44 @@
+﻿{
+  "name": "List Seasons By Series ID",
+  "category": "Catalog",
+  "method": "GET",
+  "path": "/api/v1/catalog/series/{id}/seasons",
+  "url": "http://localhost:8080/api/v1/catalog/series/1/seasons",
+  "description": "دریافت لیست فصل‌های یک سریال به ترتیب شماره فصل",
+  "auth": {
+    "required": false,
+    "type": "none",
+    "description": "اندپوینت عمومی"
+  },
+  "headers": {},
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 1,
+      "description": "شناسه سریال"
+    }
+  },
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": 1,
+          "season_number": 1,
+          "series_id": 1,
+          "synopsis": "Walter White enters the drug trade",
+          "title": "Season 1"
+        }
+      ]
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/catalog/series/1/seasons\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/catalog/series/1/seasons\").then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Catalog/List-Seasons.bru"
+  }
+}

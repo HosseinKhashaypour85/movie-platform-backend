@@ -1,0 +1,61 @@
+﻿{
+  "name": "Update Season",
+  "category": "Admin-Seasons",
+  "method": "PUT",
+  "path": "/api/v1/admin/seasons/{id}",
+  "url": "http://localhost:8080/api/v1/admin/seasons/2",
+  "description": "ویرایش عنوان و شماره فصل",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 2,
+      "description": "شناسه فصل"
+    }
+  },
+  "query_params": {},
+  "request_body": {
+    "season_number": 2,
+    "synopsis": "Updated synopsis",
+    "title": "Season 2 (Special)"
+  },
+  "request_fields": {
+    "season_number": {
+      "type": "integer",
+      "required": true,
+      "description": "شماره فصل"
+    },
+    "synopsis": {
+      "type": "string",
+      "required": false,
+      "description": "خلاصه"
+    },
+    "title": {
+      "type": "string",
+      "required": false,
+      "description": "عنوان"
+    }
+  },
+  "response_example": {
+    "status": 200,
+    "body": {
+      "id": 2,
+      "season_number": 2,
+      "title": "Season 2 (Special)"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X PUT \"http://localhost:8080/api/v1/admin/seasons/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"season_number\":2,\"title\":\"Season 2 (Special)\"}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/seasons/2\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ season_number: 2, title: \"Season 2 (Special)\" })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Seasons/Update-Season.bru"
+  }
+}

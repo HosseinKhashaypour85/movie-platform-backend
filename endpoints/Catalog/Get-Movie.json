@@ -1,0 +1,44 @@
+﻿{
+  "name": "Get Movie By ID",
+  "category": "Catalog",
+  "method": "GET",
+  "path": "/api/v1/catalog/movies/{id}",
+  "url": "http://localhost:8080/api/v1/catalog/movies/1",
+  "description": "مشاهده مشخصات کامل یک فیلم با شناسه ID",
+  "auth": {
+    "required": false,
+    "type": "none",
+    "description": "اندپوینت عمومی"
+  },
+  "headers": {},
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 1,
+      "description": "شناسه یکتای فیلم"
+    }
+  },
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "duration_minutes": 148,
+      "genre_id": 1,
+      "id": 1,
+      "is_published": true,
+      "poster_url": "https://storage.example.com/movies/1/poster.webp",
+      "release_year": 2010,
+      "slug": "inception",
+      "synopsis": "A thief who steals corporate secrets...",
+      "title": "Inception"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/catalog/movies/1\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/catalog/movies/1\").then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Catalog/Get-Movie.bru"
+  }
+}

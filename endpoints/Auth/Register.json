@@ -1,0 +1,60 @@
+﻿{
+  "name": "Register User",
+  "category": "Auth",
+  "method": "POST",
+  "path": "/api/v1/auth/register",
+  "url": "http://localhost:8080/api/v1/auth/register",
+  "description": "ثبت‌نام کاربر جدید با نام، ایمیل یکتا و رمز عبور قوی و صدور توکن‌های دسترسی",
+  "auth": {
+    "required": false,
+    "type": "none",
+    "description": "اندپوینت عمومی"
+  },
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": {
+    "email": "hosein@example.com",
+    "name": "Hosein Khashayarpour",
+    "password": "SuperSecurePass123!"
+  },
+  "request_fields": {
+    "email": {
+      "type": "string",
+      "required": true,
+      "format": "email",
+      "description": "ایمیل معتبر و یکتا"
+    },
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "نام کامل کاربر (حداکثر ۱۰۰ کاراکتر)"
+    },
+    "password": {
+      "type": "string",
+      "required": true,
+      "description": "رمز عبور با حداقل ۸ کاراکتر"
+    }
+  },
+  "response_example": {
+    "status": 201,
+    "body": {
+      "refresh_token": "b472e3a1-7c89-4d82-95f0-6c9f28d8b412",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ...",
+      "user": {
+        "email": "hosein@example.com",
+        "id": 1,
+        "is_active": true,
+        "name": "Hosein Khashayarpour",
+        "role": "user"
+      }
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X POST \"http://localhost:8080/api/v1/auth/register\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Hosein Khashayarpour\",\"email\":\"hosein@example.com\",\"password\":\"SuperSecurePass123!\"}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/auth/register\", {\n  method: \"POST\",\n  headers: { \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ name: \"Hosein Khashayarpour\", email: \"hosein@example.com\", password: \"SuperSecurePass123!\" })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Auth/Register.bru"
+  }
+}

@@ -1,0 +1,30 @@
+﻿{
+  "name": "Readiness Probe",
+  "category": "System",
+  "method": "GET",
+  "path": "/health/ready",
+  "url": "http://localhost:8080/health/ready",
+  "description": "بررسی آماده به کار بودن و اتصال به دیتابیس MySQL (Readiness Probe)",
+  "auth": {
+    "required": false,
+    "type": "none",
+    "description": "اندپوینت عمومی"
+  },
+  "headers": {},
+  "url_params": {},
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "database": "connected",
+      "status": "ready"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/health/ready\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/health/ready\").then(r => r.json()).then(console.log);",
+    "bruno": "bruno/System/Readiness-Probe.bru"
+  }
+}

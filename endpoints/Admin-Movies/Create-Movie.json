@@ -1,0 +1,82 @@
+﻿{
+  "name": "Create Movie",
+  "category": "Admin-Movies",
+  "method": "POST",
+  "path": "/api/v1/admin/movies",
+  "url": "http://localhost:8080/api/v1/admin/movies",
+  "description": "ایجاد یک فیلم جدید در کاتالوگ با عنوان، اسلاگ، سال و مدت زمان",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": {
+    "duration_minutes": 169,
+    "genre_id": 1,
+    "is_published": true,
+    "release_year": 2014,
+    "slug": "interstellar",
+    "synopsis": "A team of explorers travel through a wormhole in space...",
+    "title": "Interstellar"
+  },
+  "request_fields": {
+    "duration_minutes": {
+      "type": "integer",
+      "required": true,
+      "description": "مدت زمان به دقیقه"
+    },
+    "genre_id": {
+      "type": "integer",
+      "required": true,
+      "description": "شناسه ژانر اصلی"
+    },
+    "is_published": {
+      "type": "boolean",
+      "required": true,
+      "description": "منتشر شده برای کاربران یا پیش‌نویس"
+    },
+    "release_year": {
+      "type": "integer",
+      "required": true,
+      "description": "سال ساخت"
+    },
+    "slug": {
+      "type": "string",
+      "required": true,
+      "description": "اسلاگ یکتا"
+    },
+    "synopsis": {
+      "type": "string",
+      "required": false,
+      "description": "خلاصه داستان"
+    },
+    "title": {
+      "type": "string",
+      "required": true,
+      "description": "عنوان فیلم"
+    }
+  },
+  "response_example": {
+    "status": 201,
+    "body": {
+      "duration_minutes": 169,
+      "genre_id": 1,
+      "id": 2,
+      "is_published": true,
+      "release_year": 2014,
+      "slug": "interstellar",
+      "title": "Interstellar"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X POST \"http://localhost:8080/api/v1/admin/movies\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"title\":\"Interstellar\",\"slug\":\"interstellar\",\"synopsis\":\"A team of explorers travel through a wormhole...\",\"release_year\":2014,\"duration_minutes\":169,\"genre_id\":1,\"is_published\":true}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/movies\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ title: \"Interstellar\", slug: \"interstellar\", release_year: 2014, duration_minutes: 169, genre_id: 1, is_published: true })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Movies/Create-Movie.bru"
+  }
+}

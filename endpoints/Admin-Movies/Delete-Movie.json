@@ -1,0 +1,38 @@
+﻿{
+  "name": "Delete Movie",
+  "category": "Admin-Movies",
+  "method": "DELETE",
+  "path": "/api/v1/admin/movies/{id}",
+  "url": "http://localhost:8080/api/v1/admin/movies/2",
+  "description": "حذف فیلم و وابستگی‌های آن از سامانه",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+  },
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 2,
+      "description": "شناسه فیلم"
+    }
+  },
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "message": "movie deleted successfully"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X DELETE \"http://localhost:8080/api/v1/admin/movies/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/movies/2\", {\n  method: \"DELETE\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Movies/Delete-Movie.bru"
+  }
+}

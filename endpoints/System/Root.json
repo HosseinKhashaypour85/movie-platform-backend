@@ -1,0 +1,30 @@
+﻿{
+  "name": "Root Service Status",
+  "category": "System",
+  "method": "GET",
+  "path": "/",
+  "url": "http://localhost:8080/",
+  "description": "بررسی وضعیت آنلاین بودن سرویس اصلی بک‌اند (Root Diagnostics)",
+  "auth": {
+    "required": false,
+    "type": "none",
+    "description": "اندپوینت عمومی بدون نیاز به احراز هویت"
+  },
+  "headers": {},
+  "url_params": {},
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "service": "movie-platform-api",
+      "status": "running"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/\").then(r => r.json()).then(console.log);",
+    "bruno": "bruno/System/Root.bru"
+  }
+}

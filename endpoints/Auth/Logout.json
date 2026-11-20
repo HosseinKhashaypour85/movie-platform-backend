@@ -1,0 +1,31 @@
+﻿{
+  "name": "Logout Current Session",
+  "category": "Auth",
+  "method": "POST",
+  "path": "/api/v1/auth/logout",
+  "url": "http://localhost:8080/api/v1/auth/logout",
+  "description": "خروج از حساب در دستگاه فعلی و ابطال نشست و Refresh Token مربوطه",
+  "auth": {
+    "required": true,
+    "type": "bearer_user",
+    "description": "نیازمند JWT Bearer Token کاربر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "message": "logged out successfully"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X POST \"http://localhost:8080/api/v1/auth/logout\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/auth/logout\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Auth/Logout.bru"
+  }
+}

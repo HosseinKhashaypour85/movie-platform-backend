@@ -1,0 +1,48 @@
+﻿{
+  "name": "Create Genre",
+  "category": "Admin-Genres",
+  "method": "POST",
+  "path": "/api/v1/admin/genres",
+  "url": "http://localhost:8080/api/v1/admin/genres",
+  "description": "ایجاد یک دسته‌بندی یا ژانر جدید برای فیلم‌ها و سریال‌ها",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": {
+    "name": "Sci-Fi",
+    "slug": "sci-fi"
+  },
+  "request_fields": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "نام ژانر"
+    },
+    "slug": {
+      "type": "string",
+      "required": true,
+      "description": "اسلاگ انگلیسی یکتا"
+    }
+  },
+  "response_example": {
+    "status": 201,
+    "body": {
+      "id": 1,
+      "name": "Sci-Fi",
+      "slug": "sci-fi"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X POST \"http://localhost:8080/api/v1/admin/genres\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Sci-Fi\",\"slug\":\"sci-fi\"}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/genres\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ name: \"Sci-Fi\", slug: \"sci-fi\" })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Genres/Create-Genre.bru"
+  }
+}

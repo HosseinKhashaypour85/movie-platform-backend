@@ -1,0 +1,38 @@
+﻿{
+  "name": "Get Movie Rating Summary",
+  "category": "Engagement",
+  "method": "GET",
+  "path": "/api/v1/movies/{movieID}/ratings/summary",
+  "url": "http://localhost:8080/api/v1/movies/1/ratings/summary",
+  "description": "مشاهده میانگین امتیاز و تعداد کل آرای ثبت شده کاربران برای یک فیلم",
+  "auth": {
+    "required": false,
+    "type": "none",
+    "description": "اندپوینت عمومی"
+  },
+  "headers": {},
+  "url_params": {
+    "movieID": {
+      "type": "integer",
+      "required": true,
+      "example": 1,
+      "description": "شناسه فیلم"
+    }
+  },
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "average_score": 8.7,
+      "movie_id": 1,
+      "total_ratings": 1420
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/movies/1/ratings/summary\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/movies/1/ratings/summary\").then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Engagement/Get-Rating-Summary.bru"
+  }
+}

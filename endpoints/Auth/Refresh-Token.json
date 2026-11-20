@@ -1,0 +1,39 @@
+﻿{
+  "name": "Refresh Access Token",
+  "category": "Auth",
+  "method": "POST",
+  "path": "/api/v1/auth/refresh",
+  "url": "http://localhost:8080/api/v1/auth/refresh",
+  "description": "تمدید توکن دسترسی منقضی شده با استفاده از Refresh Token معتبر",
+  "auth": {
+    "required": false,
+    "type": "none",
+    "description": "اندپوینت عمومی"
+  },
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": {
+    "refresh_token": "b472e3a1-7c89-4d82-95f0-6c9f28d8b412"
+  },
+  "request_fields": {
+    "refresh_token": {
+      "type": "string",
+      "required": true,
+      "description": "شناسه معتبر نشست کاربر (UUID)"
+    }
+  },
+  "response_example": {
+    "status": 200,
+    "body": {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.newly_issued_access_token..."
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X POST \"http://localhost:8080/api/v1/auth/refresh\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"refresh_token\":\"b472e3a1-7c89-4d82-95f0-6c9f28d8b412\"}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/auth/refresh\", {\n  method: \"POST\",\n  headers: { \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ refresh_token: \"b472e3a1-7c89-4d82-95f0-6c9f28d8b412\" })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Auth/Refresh-Token.bru"
+  }
+}

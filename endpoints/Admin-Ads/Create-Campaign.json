@@ -1,0 +1,81 @@
+﻿{
+  "name": "Create Ad Campaign",
+  "category": "Admin-Ads",
+  "method": "POST",
+  "path": "/api/v1/ads",
+  "url": "http://localhost:8080/api/v1/ads",
+  "description": "ایجاد یک کمپین تبلیغاتی جدید با زمان‌بندی و لینک فرود",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": {
+    "click_url": "https://sponsor.test/spring",
+    "end_at": "2026-04-01T00:00:00Z",
+    "is_active": true,
+    "media_url": "https://cdn.example.com/spring.mp4",
+    "placement": "preroll",
+    "start_at": "2026-03-01T00:00:00Z",
+    "title": "Spring Promo"
+  },
+  "request_fields": {
+    "click_url": {
+      "type": "string",
+      "required": true,
+      "description": "آدرس سایت هدف هنگام کلیک"
+    },
+    "end_at": {
+      "type": "string",
+      "required": true,
+      "format": "date-time",
+      "description": "تاریخ پایان"
+    },
+    "is_active": {
+      "type": "boolean",
+      "required": true,
+      "description": "فعال بودن کمپین"
+    },
+    "media_url": {
+      "type": "string",
+      "required": true,
+      "description": "آدرس فایل ویدیو یا بنر"
+    },
+    "placement": {
+      "type": "string",
+      "required": true,
+      "description": "'preroll', 'midroll', 'banner'"
+    },
+    "start_at": {
+      "type": "string",
+      "required": true,
+      "format": "date-time",
+      "description": "تاریخ شروع"
+    },
+    "title": {
+      "type": "string",
+      "required": true,
+      "description": "عنوان کمپین"
+    }
+  },
+  "response_example": {
+    "status": 201,
+    "body": {
+      "id": 2,
+      "is_active": true,
+      "placement": "preroll",
+      "title": "Spring Promo"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X POST \"http://localhost:8080/api/v1/ads\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"title\":\"Spring Promo\",\"placement\":\"preroll\",\"media_url\":\"https://cdn.example.com/spring.mp4\",\"click_url\":\"https://sponsor.test/spring\",\"is_active\":true,\"start_at\":\"2026-03-01T00:00:00Z\",\"end_at\":\"2026-04-01T00:00:00Z\"}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/ads\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ title: \"Spring Promo\", placement: \"preroll\", media_url: \"https://cdn.example.com/spring.mp4\", click_url: \"https://sponsor.test/spring\", is_active: true, start_at: \"2026-03-01T00:00:00Z\", end_at: \"2026-04-01T00:00:00Z\" })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Ads/Create-Campaign.bru"
+  }
+}

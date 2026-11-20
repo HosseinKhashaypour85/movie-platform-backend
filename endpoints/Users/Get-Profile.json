@@ -1,0 +1,36 @@
+﻿{
+  "name": "Get User Profile",
+  "category": "Users",
+  "method": "GET",
+  "path": "/api/v1/profile",
+  "url": "http://localhost:8080/api/v1/profile",
+  "description": "دریافت مشخصات کامل حساب کاربری احراز هویت شده جاری",
+  "auth": {
+    "required": true,
+    "type": "bearer_user",
+    "description": "نیازمند JWT Bearer Token کاربر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "created_at": "2026-11-20T12:00:00Z",
+      "email": "hosein@example.com",
+      "id": 1,
+      "is_active": true,
+      "name": "Hosein Khashayarpour",
+      "role": "user"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/profile\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/profile\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Users/Get-Profile.bru"
+  }
+}

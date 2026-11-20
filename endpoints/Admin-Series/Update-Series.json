@@ -1,0 +1,72 @@
+﻿{
+  "name": "Update Series",
+  "category": "Admin-Series",
+  "method": "PUT",
+  "path": "/api/v1/admin/series/{id}",
+  "url": "http://localhost:8080/api/v1/admin/series/2",
+  "description": "ویرایش مشخصات سریال",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 2,
+      "description": "شناسه سریال"
+    }
+  },
+  "query_params": {},
+  "request_body": {
+    "description": "Updated description...",
+    "is_published": true,
+    "release_year": 2016,
+    "slug": "stranger-things",
+    "title": "Stranger Things Updated"
+  },
+  "request_fields": {
+    "description": {
+      "type": "string",
+      "required": false,
+      "description": "توضیحات"
+    },
+    "is_published": {
+      "type": "boolean",
+      "required": true,
+      "description": "وضعیت انتشار"
+    },
+    "release_year": {
+      "type": "integer",
+      "required": true,
+      "description": "سال انتشار"
+    },
+    "slug": {
+      "type": "string",
+      "required": true,
+      "description": "اسلاگ"
+    },
+    "title": {
+      "type": "string",
+      "required": true,
+      "description": "عنوان جدید"
+    }
+  },
+  "response_example": {
+    "status": 200,
+    "body": {
+      "id": 2,
+      "title": "Stranger Things Updated"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X PUT \"http://localhost:8080/api/v1/admin/series/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"title\":\"Stranger Things Updated\",\"slug\":\"stranger-things\",\"release_year\":2016,\"is_published\":true}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/series/2\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ title: \"Stranger Things Updated\", slug: \"stranger-things\", release_year: 2016, is_published: true })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Series/Update-Series.bru"
+  }
+}

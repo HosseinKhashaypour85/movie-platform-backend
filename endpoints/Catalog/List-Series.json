@@ -1,0 +1,59 @@
+﻿{
+  "name": "List Published Series",
+  "category": "Catalog",
+  "method": "GET",
+  "path": "/api/v1/catalog/series",
+  "url": "http://localhost:8080/api/v1/catalog/series?limit=20&offset=0&q=Breaking",
+  "description": "دریافت لیست سریال‌های منتشر شده با امکان جستجو و صفحه‌بندی",
+  "auth": {
+    "required": false,
+    "type": "none",
+    "description": "اندپوینت عمومی"
+  },
+  "headers": {},
+  "url_params": {},
+  "query_params": {
+    "limit": {
+      "type": "integer",
+      "required": false,
+      "default": 20,
+      "description": "تعداد در صفحه"
+    },
+    "offset": {
+      "type": "integer",
+      "required": false,
+      "default": 0,
+      "description": "آفست صفحه‌بندی"
+    },
+    "q": {
+      "type": "string",
+      "required": false,
+      "description": "جستجو در عنوان یا توضیحات"
+    }
+  },
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "description": "A chemistry teacher diagnosed with cancer...",
+          "id": 1,
+          "is_published": true,
+          "release_year": 2008,
+          "slug": "breaking-bad",
+          "title": "Breaking Bad"
+        }
+      ],
+      "limit": 20,
+      "offset": 0,
+      "total": 1
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/catalog/series?limit=20&offset=0\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/catalog/series?limit=20&offset=0\").then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Catalog/List-Series.bru"
+  }
+}

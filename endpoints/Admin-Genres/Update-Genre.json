@@ -1,0 +1,55 @@
+﻿{
+  "name": "Update Genre",
+  "category": "Admin-Genres",
+  "method": "PUT",
+  "path": "/api/v1/admin/genres/{id}",
+  "url": "http://localhost:8080/api/v1/admin/genres/1",
+  "description": "ویرایش نام یا اسلاگ یک ژانر موجود",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 1,
+      "description": "شناسه ژانر"
+    }
+  },
+  "query_params": {},
+  "request_body": {
+    "name": "Science Fiction",
+    "slug": "science-fiction"
+  },
+  "request_fields": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "نام جدید ژانر"
+    },
+    "slug": {
+      "type": "string",
+      "required": true,
+      "description": "اسلاگ جدید ژانر"
+    }
+  },
+  "response_example": {
+    "status": 200,
+    "body": {
+      "id": 1,
+      "name": "Science Fiction",
+      "slug": "science-fiction"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X PUT \"http://localhost:8080/api/v1/admin/genres/1\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Science Fiction\",\"slug\":\"science-fiction\"}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/genres/1\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ name: \"Science Fiction\", slug: \"science-fiction\" })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Genres/Update-Genre.bru"
+  }
+}

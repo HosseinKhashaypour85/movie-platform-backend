@@ -1,0 +1,66 @@
+﻿{
+  "name": "Initiate Presigned S3 Upload",
+  "category": "Admin-Media",
+  "method": "POST",
+  "path": "/api/v1/admin/media/uploads",
+  "url": "http://localhost:8080/api/v1/admin/media/uploads",
+  "description": "ایجاد لینک امضا شده موقت S3 (Presigned PUT) برای آپلود مستقیم ویدیوی باکیفیت یا پوستر از فرانت‌اند",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": {
+    "content_type": "video/mp4",
+    "kind": "video",
+    "size_bytes": 1048576000,
+    "target_id": 1,
+    "target_type": "movie"
+  },
+  "request_fields": {
+    "content_type": {
+      "type": "string",
+      "required": true,
+      "description": "MIME type فایل (مثلاً video/mp4)"
+    },
+    "kind": {
+      "type": "string",
+      "required": true,
+      "description": "نوع است: 'video', 'trailer', 'poster'"
+    },
+    "size_bytes": {
+      "type": "integer",
+      "required": true,
+      "description": "حجم فایل به بایت"
+    },
+    "target_id": {
+      "type": "integer",
+      "required": true,
+      "description": "شناسه فیلم یا اپیزود هدف"
+    },
+    "target_type": {
+      "type": "string",
+      "required": true,
+      "description": "'movie' یا 'episode'"
+    }
+  },
+  "response_example": {
+    "status": 201,
+    "body": {
+      "expires_in": 3600,
+      "storage_key": "movies/1/video/source.mp4",
+      "upload_url": "https://s3.example.com/bucket/movies/1/video/source.mp4?X-Amz-Signature=..."
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X POST \"http://localhost:8080/api/v1/admin/media/uploads\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"target_type\":\"movie\",\"target_id\":1,\"kind\":\"video\",\"content_type\":\"video/mp4\",\"size_bytes\":1048576000}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/media/uploads\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ target_type: \"movie\", target_id: 1, kind: \"video\", content_type: \"video/mp4\", size_bytes: 1048576000 })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Media/Initiate-Media-Upload.bru"
+  }
+}

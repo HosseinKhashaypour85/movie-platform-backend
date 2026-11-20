@@ -1,0 +1,3407 @@
+﻿{
+  "base_url": "http://localhost:8080",
+  "endpoints": [
+    {
+      "name": "Root Service Status",
+      "category": "System",
+      "method": "GET",
+      "path": "/",
+      "url": "http://localhost:8080/",
+      "description": "بررسی وضعیت آنلاین بودن سرویس اصلی بک‌اند (Root Diagnostics)",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی بدون نیاز به احراز هویت"
+      },
+      "headers": {},
+      "url_params": {},
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "service": "movie-platform-api",
+          "status": "running"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/\").then(r => r.json()).then(console.log);",
+        "bruno": "bruno/System/Root.bru"
+      }
+    },
+    {
+      "name": "Liveness Probe",
+      "category": "System",
+      "method": "GET",
+      "path": "/health/live",
+      "url": "http://localhost:8080/health/live",
+      "description": "بررسی زنده بودن پروسس سرور برای کوبرنتیز و داکر (Liveness Probe)",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {},
+      "url_params": {},
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "status": "alive"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/health/live\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/health/live\").then(r => r.json()).then(console.log);",
+        "bruno": "bruno/System/Liveness-Probe.bru"
+      }
+    },
+    {
+      "name": "Readiness Probe",
+      "category": "System",
+      "method": "GET",
+      "path": "/health/ready",
+      "url": "http://localhost:8080/health/ready",
+      "description": "بررسی آماده به کار بودن و اتصال به دیتابیس MySQL (Readiness Probe)",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {},
+      "url_params": {},
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "database": "connected",
+          "status": "ready"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/health/ready\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/health/ready\").then(r => r.json()).then(console.log);",
+        "bruno": "bruno/System/Readiness-Probe.bru"
+      }
+    },
+    {
+      "name": "Register User",
+      "category": "Auth",
+      "method": "POST",
+      "path": "/api/v1/auth/register",
+      "url": "http://localhost:8080/api/v1/auth/register",
+      "description": "ثبت‌نام کاربر جدید با نام، ایمیل یکتا و رمز عبور قوی و صدور توکن‌های دسترسی",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "email": "hosein@example.com",
+        "name": "Hosein Khashayarpour",
+        "password": "SuperSecurePass123!"
+      },
+      "request_fields": {
+        "email": {
+          "type": "string",
+          "required": true,
+          "format": "email",
+          "description": "ایمیل معتبر و یکتا"
+        },
+        "name": {
+          "type": "string",
+          "required": true,
+          "description": "نام کامل کاربر (حداکثر ۱۰۰ کاراکتر)"
+        },
+        "password": {
+          "type": "string",
+          "required": true,
+          "description": "رمز عبور با حداقل ۸ کاراکتر"
+        }
+      },
+      "response_example": {
+        "status": 201,
+        "body": {
+          "refresh_token": "b472e3a1-7c89-4d82-95f0-6c9f28d8b412",
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ...",
+          "user": {
+            "email": "hosein@example.com",
+            "id": 1,
+            "is_active": true,
+            "name": "Hosein Khashayarpour",
+            "role": "user"
+          }
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/auth/register\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Hosein Khashayarpour\",\"email\":\"hosein@example.com\",\"password\":\"SuperSecurePass123!\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/auth/register\", {\n  method: \"POST\",\n  headers: { \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ name: \"Hosein Khashayarpour\", email: \"hosein@example.com\", password: \"SuperSecurePass123!\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Auth/Register.bru"
+      }
+    },
+    {
+      "name": "Login User",
+      "category": "Auth",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "url": "http://localhost:8080/api/v1/auth/login",
+      "description": "ورود کاربر به سامانه با ایمیل و رمز عبور و دریافت JWT Access Token و Refresh Token",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "email": "hosein@example.com",
+        "password": "SuperSecurePass123!"
+      },
+      "request_fields": {
+        "email": {
+          "type": "string",
+          "required": true,
+          "format": "email",
+          "description": "ایمیل ثبت‌شده"
+        },
+        "password": {
+          "type": "string",
+          "required": true,
+          "description": "کلمه عبور حساب"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "refresh_token": "b472e3a1-7c89-4d82-95f0-6c9f28d8b412",
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ...",
+          "user": {
+            "email": "hosein@example.com",
+            "id": 1,
+            "is_active": true,
+            "name": "Hosein Khashayarpour",
+            "role": "user"
+          }
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/auth/login\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"email\":\"hosein@example.com\",\"password\":\"SuperSecurePass123!\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/auth/login\", {\n  method: \"POST\",\n  headers: { \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ email: \"hosein@example.com\", password: \"SuperSecurePass123!\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Auth/Login.bru"
+      }
+    },
+    {
+      "name": "Refresh Access Token",
+      "category": "Auth",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "url": "http://localhost:8080/api/v1/auth/refresh",
+      "description": "تمدید توکن دسترسی منقضی شده با استفاده از Refresh Token معتبر",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "refresh_token": "b472e3a1-7c89-4d82-95f0-6c9f28d8b412"
+      },
+      "request_fields": {
+        "refresh_token": {
+          "type": "string",
+          "required": true,
+          "description": "شناسه معتبر نشست کاربر (UUID)"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.newly_issued_access_token..."
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/auth/refresh\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"refresh_token\":\"b472e3a1-7c89-4d82-95f0-6c9f28d8b412\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/auth/refresh\", {\n  method: \"POST\",\n  headers: { \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ refresh_token: \"b472e3a1-7c89-4d82-95f0-6c9f28d8b412\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Auth/Refresh-Token.bru"
+      }
+    },
+    {
+      "name": "Logout Current Session",
+      "category": "Auth",
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "url": "http://localhost:8080/api/v1/auth/logout",
+      "description": "خروج از حساب در دستگاه فعلی و ابطال نشست و Refresh Token مربوطه",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند JWT Bearer Token کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "logged out successfully"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/auth/logout\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/auth/logout\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Auth/Logout.bru"
+      }
+    },
+    {
+      "name": "Logout All Sessions",
+      "category": "Auth",
+      "method": "POST",
+      "path": "/api/v1/auth/logout-all",
+      "url": "http://localhost:8080/api/v1/auth/logout-all",
+      "description": "خروج همزمان از تمامی دستگاه‌ها و ابطال کامل تمامی توکن‌های کاربر",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند JWT Bearer Token کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "logged out of all sessions successfully"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/auth/logout-all\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/auth/logout-all\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Auth/Logout-All.bru"
+      }
+    },
+    {
+      "name": "Get User Profile",
+      "category": "Users",
+      "method": "GET",
+      "path": "/api/v1/profile",
+      "url": "http://localhost:8080/api/v1/profile",
+      "description": "دریافت مشخصات کامل حساب کاربری احراز هویت شده جاری",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند JWT Bearer Token کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "created_at": "2026-11-20T12:00:00Z",
+          "email": "hosein@example.com",
+          "id": 1,
+          "is_active": true,
+          "name": "Hosein Khashayarpour",
+          "role": "user"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/profile\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/profile\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Users/Get-Profile.bru"
+      }
+    },
+    {
+      "name": "Update User Profile",
+      "category": "Users",
+      "method": "PATCH",
+      "path": "/api/v1/profile",
+      "url": "http://localhost:8080/api/v1/profile",
+      "description": "ویرایش اطلاعات قابل تغییر پروفایل (مانند نام کاربر)",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند JWT Bearer Token کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "name": "Hosein Khashayarpour (Updated)"
+      },
+      "request_fields": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "description": "نام جدید کاربر"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "email": "hosein@example.com",
+          "id": 1,
+          "name": "Hosein Khashayarpour (Updated)",
+          "role": "user"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X PATCH \"http://localhost:8080/api/v1/profile\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Hosein Khashayarpour (Updated)\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/profile\", {\n  method: \"PATCH\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ name: \"Hosein Khashayarpour (Updated)\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Users/Update-Profile.bru"
+      }
+    },
+    {
+      "name": "Change Password",
+      "category": "Users",
+      "method": "POST",
+      "path": "/api/v1/profile/change-password",
+      "url": "http://localhost:8080/api/v1/profile/change-password",
+      "description": "تغییر کلمه عبور کاربر و ابطال همزمان تمامی نشست‌های دیگر در سایر دستگاه‌ها",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند JWT Bearer Token کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "current_password": "SuperSecurePass123!",
+        "new_password": "NewStrongPassword2026!"
+      },
+      "request_fields": {
+        "current_password": {
+          "type": "string",
+          "required": true,
+          "description": "رمز عبور فعلی کاربر"
+        },
+        "new_password": {
+          "type": "string",
+          "required": true,
+          "description": "رمز عبور جدید (حداقل ۸ کاراکتر)"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "password updated successfully; other sessions revoked"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/profile/change-password\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"current_password\":\"SuperSecurePass123!\",\"new_password\":\"NewStrongPassword2026!\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/profile/change-password\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ current_password: \"SuperSecurePass123!\", new_password: \"NewStrongPassword2026!\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Users/Change-Password.bru"
+      }
+    },
+    {
+      "name": "List Published Movies",
+      "category": "Catalog",
+      "method": "GET",
+      "path": "/api/v1/catalog/movies",
+      "url": "http://localhost:8080/api/v1/catalog/movies?limit=20&offset=0&genre_id=1&year=2024&q=Inception",
+      "description": "دریافت لیست فیلم‌های منتشر شده با قابلیت جستجوی متنی، فیلتر ژانر، سال ساخت و صفحه‌بندی",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {},
+      "url_params": {},
+      "query_params": {
+        "genre_id": {
+          "type": "integer",
+          "required": false,
+          "description": "فیلتر بر اساس شناسه ژانر"
+        },
+        "limit": {
+          "type": "integer",
+          "required": false,
+          "default": 20,
+          "description": "تعداد آیتم‌ها در هر صفحه"
+        },
+        "offset": {
+          "type": "integer",
+          "required": false,
+          "default": 0,
+          "description": "تعداد آفست برای صفحه‌بندی"
+        },
+        "q": {
+          "type": "string",
+          "required": false,
+          "description": "کلمه کلیدی جهت جستجو در عنوان یا خلاصه"
+        },
+        "year": {
+          "type": "integer",
+          "required": false,
+          "description": "فیلتر بر اساس سال انتشار"
+        }
+      },
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "duration_minutes": 148,
+              "genre_id": 1,
+              "id": 1,
+              "is_published": true,
+              "poster_url": "https://storage.example.com/movies/1/poster.webp",
+              "release_year": 2010,
+              "slug": "inception",
+              "synopsis": "A thief who steals corporate secrets...",
+              "title": "Inception"
+            }
+          ],
+          "limit": 20,
+          "offset": 0,
+          "total": 1
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/catalog/movies?limit=20&offset=0\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/catalog/movies?limit=20&offset=0\").then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Catalog/List-Movies.bru"
+      }
+    },
+    {
+      "name": "Get Movie By ID",
+      "category": "Catalog",
+      "method": "GET",
+      "path": "/api/v1/catalog/movies/{id}",
+      "url": "http://localhost:8080/api/v1/catalog/movies/1",
+      "description": "مشاهده مشخصات کامل یک فیلم با شناسه ID",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {},
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه یکتای فیلم"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "duration_minutes": 148,
+          "genre_id": 1,
+          "id": 1,
+          "is_published": true,
+          "poster_url": "https://storage.example.com/movies/1/poster.webp",
+          "release_year": 2010,
+          "slug": "inception",
+          "synopsis": "A thief who steals corporate secrets...",
+          "title": "Inception"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/catalog/movies/1\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/catalog/movies/1\").then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Catalog/Get-Movie.bru"
+      }
+    },
+    {
+      "name": "List Published Series",
+      "category": "Catalog",
+      "method": "GET",
+      "path": "/api/v1/catalog/series",
+      "url": "http://localhost:8080/api/v1/catalog/series?limit=20&offset=0&q=Breaking",
+      "description": "دریافت لیست سریال‌های منتشر شده با امکان جستجو و صفحه‌بندی",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {},
+      "url_params": {},
+      "query_params": {
+        "limit": {
+          "type": "integer",
+          "required": false,
+          "default": 20,
+          "description": "تعداد در صفحه"
+        },
+        "offset": {
+          "type": "integer",
+          "required": false,
+          "default": 0,
+          "description": "آفست صفحه‌بندی"
+        },
+        "q": {
+          "type": "string",
+          "required": false,
+          "description": "جستجو در عنوان یا توضیحات"
+        }
+      },
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "description": "A chemistry teacher diagnosed with cancer...",
+              "id": 1,
+              "is_published": true,
+              "release_year": 2008,
+              "slug": "breaking-bad",
+              "title": "Breaking Bad"
+            }
+          ],
+          "limit": 20,
+          "offset": 0,
+          "total": 1
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/catalog/series?limit=20&offset=0\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/catalog/series?limit=20&offset=0\").then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Catalog/List-Series.bru"
+      }
+    },
+    {
+      "name": "Get Series By ID",
+      "category": "Catalog",
+      "method": "GET",
+      "path": "/api/v1/catalog/series/{id}",
+      "url": "http://localhost:8080/api/v1/catalog/series/1",
+      "description": "مشاهده جزییات کامل یک سریال با شناسه ID",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {},
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه سریال"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "description": "A chemistry teacher diagnosed with cancer...",
+          "id": 1,
+          "is_published": true,
+          "release_year": 2008,
+          "slug": "breaking-bad",
+          "title": "Breaking Bad"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/catalog/series/1\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/catalog/series/1\").then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Catalog/Get-Series.bru"
+      }
+    },
+    {
+      "name": "List Seasons By Series ID",
+      "category": "Catalog",
+      "method": "GET",
+      "path": "/api/v1/catalog/series/{id}/seasons",
+      "url": "http://localhost:8080/api/v1/catalog/series/1/seasons",
+      "description": "دریافت لیست فصل‌های یک سریال به ترتیب شماره فصل",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {},
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه سریال"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "id": 1,
+              "season_number": 1,
+              "series_id": 1,
+              "synopsis": "Walter White enters the drug trade",
+              "title": "Season 1"
+            }
+          ]
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/catalog/series/1/seasons\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/catalog/series/1/seasons\").then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Catalog/List-Seasons.bru"
+      }
+    },
+    {
+      "name": "List Episodes By Season ID",
+      "category": "Catalog",
+      "method": "GET",
+      "path": "/api/v1/catalog/seasons/{id}/episodes",
+      "url": "http://localhost:8080/api/v1/catalog/seasons/1/episodes",
+      "description": "دریافت لیست قسمت‌های یک فصل به ترتیب شماره قسمت",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {},
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه فصل"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "duration_minutes": 58,
+              "episode_number": 1,
+              "id": 1,
+              "is_published": true,
+              "season_id": 1,
+              "synopsis": "Walter turns to cooking meth",
+              "title": "Pilot"
+            }
+          ]
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/catalog/seasons/1/episodes\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/catalog/seasons/1/episodes\").then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Catalog/List-Episodes.bru"
+      }
+    },
+    {
+      "name": "Get Signed HLS Manifest",
+      "category": "Playback",
+      "method": "GET",
+      "path": "/api/v1/playback/{kind}/{id}",
+      "url": "http://localhost:8080/api/v1/playback/movies/1",
+      "description": "صدور URL امضا شده و دارای انقضای زمانی برای پخش استریم HLS ویدیوی فیلم یا اپیزود",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه فیلم یا قسمت سریال"
+        },
+        "kind": {
+          "type": "string",
+          "required": true,
+          "example": "movies",
+          "description": "نوع رسانه ('movies' یا 'episodes')"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "expires_in": 7200,
+          "manifest_url": "https://gateway.example.com/hls/movies/1/master.m3u8?token=sig&expires=1700000000"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/playback/movies/1\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/playback/movies/1\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Playback/Get-Signed-Manifest.bru"
+      }
+    },
+    {
+      "name": "List Published Subtitles",
+      "category": "Playback",
+      "method": "GET",
+      "path": "/api/v1/media/{kind}/{id}/subtitles",
+      "url": "http://localhost:8080/api/v1/media/movies/1/subtitles",
+      "description": "دریافت زیرنویس‌های منتشر شده و آماده دانلود برای یک فیلم یا اپیزود",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {},
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه فیلم یا قسمت"
+        },
+        "kind": {
+          "type": "string",
+          "required": true,
+          "example": "movies",
+          "description": "'movies' یا 'episodes'"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "download_url": "https://storage.example.com/subtitles/1_fa.vtt",
+              "format": "vtt",
+              "id": 1,
+              "is_generated": true,
+              "label": "Persian",
+              "language": "fa"
+            }
+          ]
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/media/movies/1/subtitles\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/media/movies/1/subtitles\").then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Playback/List-Subtitles.bru"
+      }
+    },
+    {
+      "name": "Serve Active Ads",
+      "category": "Ads",
+      "method": "GET",
+      "path": "/api/v1/ads",
+      "url": "http://localhost:8080/api/v1/ads?placement=preroll",
+      "description": "دریافت کمپین‌های تبلیغاتی فعال متناسب با موقعیت نمایش (مانند اول ویدیو preroll)",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {},
+      "url_params": {},
+      "query_params": {
+        "placement": {
+          "type": "string",
+          "required": false,
+          "default": "preroll",
+          "description": "جایگاه تبلیغ (preroll, midroll, banner)"
+        }
+      },
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "click_url": "https://sponsor.test/deal",
+              "id": 1,
+              "media_url": "https://cdn.example.com/ads/promo.mp4",
+              "placement": "preroll",
+              "title": "Summer Promo"
+            }
+          ]
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/ads?placement=preroll\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/ads?placement=preroll\").then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Ads/Serve-Ads.bru"
+      }
+    },
+    {
+      "name": "Track Ad Event",
+      "category": "Ads",
+      "method": "POST",
+      "path": "/api/v1/ads/{id}/events",
+      "url": "http://localhost:8080/api/v1/ads/1/events",
+      "description": "ثبت رویداد نمایش (impression) یا کلیک (click) برای یک تبلیغ",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه کمپین تبلیغاتی"
+        }
+      },
+      "query_params": {},
+      "request_body": {
+        "event_type": "impression",
+        "metadata": "{\"device\":\"mobile\"}"
+      },
+      "request_fields": {
+        "event_type": {
+          "type": "string",
+          "required": true,
+          "description": "نوع رویداد: 'impression' یا 'click'"
+        },
+        "metadata": {
+          "type": "string",
+          "required": false,
+          "description": "متادیتا یا اطلاعات دستگاه به صورت رشته/JSON"
+        }
+      },
+      "response_example": {
+        "status": 201,
+        "body": {
+          "message": "event tracked successfully"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/ads/1/events\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"event_type\":\"impression\",\"metadata\":\"{\\\"device\\\":\\\"mobile\\\"}\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/ads/1/events\", {\n  method: \"POST\",\n  headers: { \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ event_type: \"impression\", metadata: \"{\\\"device\\\":\\\"mobile\\\"}\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Ads/Track-Event.bru"
+      }
+    },
+    {
+      "name": "Get Movie Rating Summary",
+      "category": "Engagement",
+      "method": "GET",
+      "path": "/api/v1/movies/{movieID}/ratings/summary",
+      "url": "http://localhost:8080/api/v1/movies/1/ratings/summary",
+      "description": "مشاهده میانگین امتیاز و تعداد کل آرای ثبت شده کاربران برای یک فیلم",
+      "auth": {
+        "required": false,
+        "type": "none",
+        "description": "اندپوینت عمومی"
+      },
+      "headers": {},
+      "url_params": {
+        "movieID": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه فیلم"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "average_score": 8.7,
+          "movie_id": 1,
+          "total_ratings": 1420
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/movies/1/ratings/summary\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/movies/1/ratings/summary\").then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Engagement/Get-Rating-Summary.bru"
+      }
+    },
+    {
+      "name": "Rate Movie",
+      "category": "Engagement",
+      "method": "POST",
+      "path": "/api/v1/movies/{movieID}/ratings",
+      "url": "http://localhost:8080/api/v1/movies/1/ratings",
+      "description": "ثبت یا تغییر امتیاز کاربر (بین ۱ تا ۱۰) برای یک فیلم",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {
+        "movieID": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه فیلم"
+        }
+      },
+      "query_params": {},
+      "request_body": {
+        "score": 9
+      },
+      "request_fields": {
+        "score": {
+          "type": "integer",
+          "required": true,
+          "description": "نمره امتیاز بین ۱ تا ۱۰"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "rating saved successfully",
+          "movie_id": 1,
+          "score": 9
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/movies/1/ratings\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"score\":9}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/movies/1/ratings\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ score: 9 })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Engagement/Rate-Movie.bru"
+      }
+    },
+    {
+      "name": "List Favorite Movies",
+      "category": "Engagement",
+      "method": "GET",
+      "path": "/api/v1/favorites",
+      "url": "http://localhost:8080/api/v1/favorites",
+      "description": "دریافت لیست فیلم‌های برگزیده و نشان‌شده کاربر",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "id": 1,
+              "poster_url": "https://storage.example.com/movies/1/poster.webp",
+              "slug": "inception",
+              "title": "Inception"
+            }
+          ]
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/favorites\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/favorites\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Engagement/List-Favorites.bru"
+      }
+    },
+    {
+      "name": "Add Movie To Favorites",
+      "category": "Engagement",
+      "method": "PUT",
+      "path": "/api/v1/favorites/{movieID}",
+      "url": "http://localhost:8080/api/v1/favorites/1",
+      "description": "افزودن یک فیلم به لیست علاقه‌مندی‌های کاربر",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {
+        "movieID": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه فیلم"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "movie added to favorites"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X PUT \"http://localhost:8080/api/v1/favorites/1\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/favorites/1\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Engagement/Add-Favorite.bru"
+      }
+    },
+    {
+      "name": "Remove Movie From Favorites",
+      "category": "Engagement",
+      "method": "DELETE",
+      "path": "/api/v1/favorites/{movieID}",
+      "url": "http://localhost:8080/api/v1/favorites/1",
+      "description": "حذف فیلم از فهرست برگزیده‌های کاربر",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {
+        "movieID": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه فیلم"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "movie removed from favorites"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X DELETE \"http://localhost:8080/api/v1/favorites/1\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/favorites/1\", {\n  method: \"DELETE\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Engagement/Remove-Favorite.bru"
+      }
+    },
+    {
+      "name": "List Movie Watch History",
+      "category": "Watch-History",
+      "method": "GET",
+      "path": "/api/v1/watch-history",
+      "url": "http://localhost:8080/api/v1/watch-history",
+      "description": "لیست فیلم‌های در حال تماشای کاربر به همراه ثانیه آخرین موقعیت پخش",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "movie": {
+                "duration_minutes": 148,
+                "id": 1,
+                "title": "Inception"
+              },
+              "movie_id": 1,
+              "position_seconds": 1540,
+              "updated_at": "2026-11-20T12:00:00Z"
+            }
+          ]
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/watch-history\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/watch-history\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Watch-History/List-Movie-History.bru"
+      }
+    },
+    {
+      "name": "Get Movie Progress",
+      "category": "Watch-History",
+      "method": "GET",
+      "path": "/api/v1/watch-history/{movieID}",
+      "url": "http://localhost:8080/api/v1/watch-history/1",
+      "description": "دریافت ثانیه دقیق پیشرفت پخش برای یک فیلم معین",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {
+        "movieID": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه فیلم"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "movie_id": 1,
+          "position_seconds": 1540,
+          "updated_at": "2026-11-20T12:00:00Z"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/watch-history/1\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/watch-history/1\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Watch-History/Get-Movie-Progress.bru"
+      }
+    },
+    {
+      "name": "Save Movie Progress",
+      "category": "Watch-History",
+      "method": "PUT",
+      "path": "/api/v1/watch-history/{movieID}",
+      "url": "http://localhost:8080/api/v1/watch-history/1",
+      "description": "ثبت یا به‌روزرسانی ثانیه تماشا برای یک فیلم (Auto-save / Resume)",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {
+        "movieID": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه فیلم"
+        }
+      },
+      "query_params": {},
+      "request_body": {
+        "position_seconds": 1620
+      },
+      "request_fields": {
+        "position_seconds": {
+          "type": "integer",
+          "required": true,
+          "description": "ثانیه جاری پخش فیلم"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "progress saved",
+          "movie_id": 1,
+          "position_seconds": 1620
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X PUT \"http://localhost:8080/api/v1/watch-history/1\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"position_seconds\":1620}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/watch-history/1\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ position_seconds: 1620 })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Watch-History/Save-Movie-Progress.bru"
+      }
+    },
+    {
+      "name": "Delete Movie Progress",
+      "category": "Watch-History",
+      "method": "DELETE",
+      "path": "/api/v1/watch-history/{movieID}",
+      "url": "http://localhost:8080/api/v1/watch-history/1",
+      "description": "حذف سابقه تماشای یک فیلم خاص از تاریخچه",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {
+        "movieID": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه فیلم"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "movie watch history deleted"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X DELETE \"http://localhost:8080/api/v1/watch-history/1\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/watch-history/1\", {\n  method: \"DELETE\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Watch-History/Delete-Movie-Progress.bru"
+      }
+    },
+    {
+      "name": "List Episode Watch History",
+      "category": "Watch-History",
+      "method": "GET",
+      "path": "/api/v1/watch-history/episodes",
+      "url": "http://localhost:8080/api/v1/watch-history/episodes",
+      "description": "لیست قسمت‌های سریال در حال تماشا با ثانیه موقعیت",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "episode": {
+                "duration_minutes": 58,
+                "id": 1,
+                "title": "Pilot"
+              },
+              "episode_id": 1,
+              "position_seconds": 920,
+              "updated_at": "2026-11-20T12:00:00Z"
+            }
+          ]
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/watch-history/episodes\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/watch-history/episodes\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Watch-History/List-Episode-History.bru"
+      }
+    },
+    {
+      "name": "Save Episode Progress",
+      "category": "Watch-History",
+      "method": "PUT",
+      "path": "/api/v1/watch-history/episodes/{episodeID}",
+      "url": "http://localhost:8080/api/v1/watch-history/episodes/1",
+      "description": "ثبت یا به‌روزرسانی ثانیه تماشای یک قسمت سریال",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {
+        "episodeID": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه قسمت سریال"
+        }
+      },
+      "query_params": {},
+      "request_body": {
+        "position_seconds": 980
+      },
+      "request_fields": {
+        "position_seconds": {
+          "type": "integer",
+          "required": true,
+          "description": "ثانیه جاری تماشای اپیزود"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "episode_id": 1,
+          "message": "progress saved",
+          "position_seconds": 980
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X PUT \"http://localhost:8080/api/v1/watch-history/episodes/1\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"position_seconds\":980}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/watch-history/episodes/1\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ position_seconds: 980 })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Watch-History/Save-Episode-Progress.bru"
+      }
+    },
+    {
+      "name": "Delete Episode Progress",
+      "category": "Watch-History",
+      "method": "DELETE",
+      "path": "/api/v1/watch-history/episodes/{episodeID}",
+      "url": "http://localhost:8080/api/v1/watch-history/episodes/1",
+      "description": "حذف سابقه تماشای یک قسمت سریال",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {
+        "episodeID": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه اپیزود"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "episode watch history deleted"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X DELETE \"http://localhost:8080/api/v1/watch-history/episodes/1\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/watch-history/episodes/1\", {\n  method: \"DELETE\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Watch-History/Delete-Episode-Progress.bru"
+      }
+    },
+    {
+      "name": "List User Notifications",
+      "category": "Notifications",
+      "method": "GET",
+      "path": "/api/v1/notifications",
+      "url": "http://localhost:8080/api/v1/notifications?limit=20&offset=0",
+      "description": "دریافت لیست اعلان‌های کاربر با وضعیت خوانده شده/نشده و صفحه‌بندی",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {},
+      "query_params": {
+        "limit": {
+          "type": "integer",
+          "required": false,
+          "default": 20,
+          "description": "تعداد در صفحه"
+        },
+        "offset": {
+          "type": "integer",
+          "required": false,
+          "default": 0,
+          "description": "آفست صفحه‌بندی"
+        }
+      },
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "created_at": "2026-11-20T12:00:00Z",
+              "id": 1,
+              "is_read": false,
+              "message": "Welcome to our streaming platform.",
+              "title": "Welcome!"
+            }
+          ],
+          "total": 1
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/notifications?limit=20&offset=0\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/notifications?limit=20&offset=0\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Notifications/List-Notifications.bru"
+      }
+    },
+    {
+      "name": "Mark Notification As Read",
+      "category": "Notifications",
+      "method": "PATCH",
+      "path": "/api/v1/notifications/{id}/read",
+      "url": "http://localhost:8080/api/v1/notifications/1/read",
+      "description": "علامت‌گذاری یک اعلان مشخص به عنوان خوانده شده",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه اعلان"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "notification marked as read"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X PATCH \"http://localhost:8080/api/v1/notifications/1/read\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/notifications/1/read\", {\n  method: \"PATCH\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Notifications/Mark-Notification-Read.bru"
+      }
+    },
+    {
+      "name": "Mark All Notifications As Read",
+      "category": "Notifications",
+      "method": "POST",
+      "path": "/api/v1/notifications/read-all",
+      "url": "http://localhost:8080/api/v1/notifications/read-all",
+      "description": "علامت‌گذاری همزمان تمام اعلان‌های خوانده نشده به عنوان خوانده شده",
+      "auth": {
+        "required": true,
+        "type": "bearer_user",
+        "description": "نیازمند توکن کاربر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "all notifications marked as read"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/notifications/read-all\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/notifications/read-all\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Notifications/Mark-All-Read.bru"
+      }
+    },
+    {
+      "name": "Admin Dashboard Counts",
+      "category": "Admin-Dashboard",
+      "method": "GET",
+      "path": "/api/v1/admin/dashboard",
+      "url": "http://localhost:8080/api/v1/admin/dashboard",
+      "description": "دریافت آمار کلی پنل مدیریت: تعداد کل کاربران، فیلم‌ها، سریال‌ها، قسمت‌ها و تبلیغات",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر (Admin/Super Admin)"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "active_ad_campaigns": 8,
+          "total_episodes": 480,
+          "total_movies": 320,
+          "total_series": 45,
+          "total_users": 1500
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/admin/dashboard\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/dashboard\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Dashboard/Dashboard-Counts.bru"
+      }
+    },
+    {
+      "name": "Admin System Analytics",
+      "category": "Admin-Dashboard",
+      "method": "GET",
+      "path": "/api/v1/admin/analytics",
+      "url": "http://localhost:8080/api/v1/admin/analytics?window_days=30",
+      "description": "تحلیل‌های آماری پلتفرم شامل تعداد کل تماشاها، فیلم‌های پرمخاطب بر اساس بازه روز",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+      },
+      "url_params": {},
+      "query_params": {
+        "window_days": {
+          "type": "integer",
+          "required": false,
+          "default": 30,
+          "description": "بازه زمانی تحلیل (۷، ۳۰، یا ۹۰ روز)"
+        }
+      },
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "top_movies": [
+            {
+              "movie_id": 1,
+              "title": "Inception",
+              "views": 12000
+            }
+          ],
+          "total_views": 45000,
+          "window_days": 30
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/admin/analytics?window_days=30\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/analytics?window_days=30\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Dashboard/System-Analytics.bru"
+      }
+    },
+    {
+      "name": "List Admin Audit Logs",
+      "category": "Admin-Dashboard",
+      "method": "GET",
+      "path": "/api/v1/admin/audit-logs",
+      "url": "http://localhost:8080/api/v1/admin/audit-logs?limit=50&offset=0",
+      "description": "مشاهده لاگ‌های امنیتی تغییرات اعمال شده توسط ادمین‌ها (Audit Trail)",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+      },
+      "url_params": {},
+      "query_params": {
+        "action": {
+          "type": "string",
+          "required": false,
+          "description": "فیلتر بر اساس نام عملیات"
+        },
+        "limit": {
+          "type": "integer",
+          "required": false,
+          "default": 50,
+          "description": "تعداد لاگ در صفحه"
+        },
+        "offset": {
+          "type": "integer",
+          "required": false,
+          "default": 0,
+          "description": "آفست"
+        },
+        "user_id": {
+          "type": "integer",
+          "required": false,
+          "description": "فیلتر بر اساس شناسه مدیر"
+        }
+      },
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "action": "CREATE_MOVIE",
+              "created_at": "2026-11-20T12:00:00Z",
+              "entity_id": 1,
+              "entity_type": "movie",
+              "id": 1,
+              "ip_address": "127.0.0.1",
+              "user_id": 1
+            }
+          ],
+          "total": 1
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/admin/audit-logs?limit=50&offset=0\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/audit-logs?limit=50&offset=0\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Dashboard/List-Audit-Logs.bru"
+      }
+    },
+    {
+      "name": "List All Users",
+      "category": "Admin-Users",
+      "method": "GET",
+      "path": "/api/v1/admin/users",
+      "url": "http://localhost:8080/api/v1/admin/users?limit=20&offset=0",
+      "description": "مشاهده لیست کامل کاربران به همراه فیلتر وضعیت حساب و جستجو",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+      },
+      "url_params": {},
+      "query_params": {
+        "is_active": {
+          "type": "boolean",
+          "required": false,
+          "description": "فیلتر کاربران فعال/مسدود شده"
+        },
+        "limit": {
+          "type": "integer",
+          "required": false,
+          "default": 20,
+          "description": "تعداد در صفحه"
+        },
+        "offset": {
+          "type": "integer",
+          "required": false,
+          "default": 0,
+          "description": "آفست"
+        },
+        "q": {
+          "type": "string",
+          "required": false,
+          "description": "جستجو در نام یا ایمیل"
+        }
+      },
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "email": "hosein@example.com",
+              "id": 1,
+              "is_active": true,
+              "name": "Hosein Khashayarpour",
+              "role": "super_admin"
+            }
+          ],
+          "total": 1
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/admin/users?limit=20&offset=0\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/users?limit=20&offset=0\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Users/List-Users.bru"
+      }
+    },
+    {
+      "name": "Set User Active Status",
+      "category": "Admin-Users",
+      "method": "PATCH",
+      "path": "/api/v1/admin/users/{id}/status",
+      "url": "http://localhost:8080/api/v1/admin/users/1/status",
+      "description": "فعال‌سازی یا مسدودسازی حساب کاربری توسط مدیر",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه کاربر هدف"
+        }
+      },
+      "query_params": {},
+      "request_body": {
+        "is_active": false
+      },
+      "request_fields": {
+        "is_active": {
+          "type": "boolean",
+          "required": true,
+          "description": "وضعیت فعال (true) یا غیرفعال (false)"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "id": 1,
+          "is_active": false,
+          "message": "user status updated"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X PATCH \"http://localhost:8080/api/v1/admin/users/1/status\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"is_active\":false}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/users/1/status\", {\n  method: \"PATCH\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ is_active: false })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Users/Set-User-Status.bru"
+      }
+    },
+    {
+      "name": "Set User Role",
+      "category": "Admin-Users",
+      "method": "PATCH",
+      "path": "/api/v1/admin/users/{id}/role",
+      "url": "http://localhost:8080/api/v1/admin/users/1/role",
+      "description": "تغییر نقش کاربر به 'user'، 'admin' یا 'super_admin' (فقط توسط سوپر ادمین)",
+      "auth": {
+        "required": true,
+        "type": "bearer_super_admin",
+        "description": "نیازمند نقش Super Admin"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_SUPER_ADMIN_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه کاربر هدف"
+        }
+      },
+      "query_params": {},
+      "request_body": {
+        "role": "admin"
+      },
+      "request_fields": {
+        "role": {
+          "type": "string",
+          "required": true,
+          "description": "نقش جدید: 'user', 'admin', 'super_admin'"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "id": 1,
+          "message": "user role updated",
+          "role": "admin"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X PATCH \"http://localhost:8080/api/v1/admin/users/1/role\" \\\n  -H \"Authorization: Bearer <YOUR_SUPER_ADMIN_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"role\":\"admin\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/users/1/role\", {\n  method: \"PATCH\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ role: \"admin\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Users/Set-User-Role.bru"
+      }
+    },
+    {
+      "name": "Create Genre",
+      "category": "Admin-Genres",
+      "method": "POST",
+      "path": "/api/v1/admin/genres",
+      "url": "http://localhost:8080/api/v1/admin/genres",
+      "description": "ایجاد یک دسته‌بندی یا ژانر جدید برای فیلم‌ها و سریال‌ها",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "name": "Sci-Fi",
+        "slug": "sci-fi"
+      },
+      "request_fields": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "description": "نام ژانر"
+        },
+        "slug": {
+          "type": "string",
+          "required": true,
+          "description": "اسلاگ انگلیسی یکتا"
+        }
+      },
+      "response_example": {
+        "status": 201,
+        "body": {
+          "id": 1,
+          "name": "Sci-Fi",
+          "slug": "sci-fi"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/admin/genres\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Sci-Fi\",\"slug\":\"sci-fi\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/genres\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ name: \"Sci-Fi\", slug: \"sci-fi\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Genres/Create-Genre.bru"
+      }
+    },
+    {
+      "name": "Update Genre",
+      "category": "Admin-Genres",
+      "method": "PUT",
+      "path": "/api/v1/admin/genres/{id}",
+      "url": "http://localhost:8080/api/v1/admin/genres/1",
+      "description": "ویرایش نام یا اسلاگ یک ژانر موجود",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه ژانر"
+        }
+      },
+      "query_params": {},
+      "request_body": {
+        "name": "Science Fiction",
+        "slug": "science-fiction"
+      },
+      "request_fields": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "description": "نام جدید ژانر"
+        },
+        "slug": {
+          "type": "string",
+          "required": true,
+          "description": "اسلاگ جدید ژانر"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "id": 1,
+          "name": "Science Fiction",
+          "slug": "science-fiction"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X PUT \"http://localhost:8080/api/v1/admin/genres/1\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Science Fiction\",\"slug\":\"science-fiction\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/genres/1\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ name: \"Science Fiction\", slug: \"science-fiction\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Genres/Update-Genre.bru"
+      }
+    },
+    {
+      "name": "Delete Genre",
+      "category": "Admin-Genres",
+      "method": "DELETE",
+      "path": "/api/v1/admin/genres/{id}",
+      "url": "http://localhost:8080/api/v1/admin/genres/1",
+      "description": "حذف ژانر (در صورتی که فیلم وابسته داشته باشد رد می‌شود)",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه ژانر"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "genre deleted successfully"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X DELETE \"http://localhost:8080/api/v1/admin/genres/1\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/genres/1\", {\n  method: \"DELETE\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Genres/Delete-Genre.bru"
+      }
+    },
+    {
+      "name": "Create Movie",
+      "category": "Admin-Movies",
+      "method": "POST",
+      "path": "/api/v1/admin/movies",
+      "url": "http://localhost:8080/api/v1/admin/movies",
+      "description": "ایجاد یک فیلم جدید در کاتالوگ با عنوان، اسلاگ، سال و مدت زمان",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "duration_minutes": 169,
+        "genre_id": 1,
+        "is_published": true,
+        "release_year": 2014,
+        "slug": "interstellar",
+        "synopsis": "A team of explorers travel through a wormhole in space...",
+        "title": "Interstellar"
+      },
+      "request_fields": {
+        "duration_minutes": {
+          "type": "integer",
+          "required": true,
+          "description": "مدت زمان به دقیقه"
+        },
+        "genre_id": {
+          "type": "integer",
+          "required": true,
+          "description": "شناسه ژانر اصلی"
+        },
+        "is_published": {
+          "type": "boolean",
+          "required": true,
+          "description": "منتشر شده برای کاربران یا پیش‌نویس"
+        },
+        "release_year": {
+          "type": "integer",
+          "required": true,
+          "description": "سال ساخت"
+        },
+        "slug": {
+          "type": "string",
+          "required": true,
+          "description": "اسلاگ یکتا"
+        },
+        "synopsis": {
+          "type": "string",
+          "required": false,
+          "description": "خلاصه داستان"
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "عنوان فیلم"
+        }
+      },
+      "response_example": {
+        "status": 201,
+        "body": {
+          "duration_minutes": 169,
+          "genre_id": 1,
+          "id": 2,
+          "is_published": true,
+          "release_year": 2014,
+          "slug": "interstellar",
+          "title": "Interstellar"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/admin/movies\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"title\":\"Interstellar\",\"slug\":\"interstellar\",\"synopsis\":\"A team of explorers travel through a wormhole...\",\"release_year\":2014,\"duration_minutes\":169,\"genre_id\":1,\"is_published\":true}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/movies\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ title: \"Interstellar\", slug: \"interstellar\", release_year: 2014, duration_minutes: 169, genre_id: 1, is_published: true })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Movies/Create-Movie.bru"
+      }
+    },
+    {
+      "name": "Update Movie",
+      "category": "Admin-Movies",
+      "method": "PUT",
+      "path": "/api/v1/admin/movies/{id}",
+      "url": "http://localhost:8080/api/v1/admin/movies/2",
+      "description": "ویرایش مشخصات فیلم موجود با شناسه ID",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 2,
+          "description": "شناسه فیلم"
+        }
+      },
+      "query_params": {},
+      "request_body": {
+        "duration_minutes": 169,
+        "genre_id": 1,
+        "is_published": true,
+        "release_year": 2014,
+        "slug": "interstellar-imax",
+        "synopsis": "Updated synopsis...",
+        "title": "Interstellar (IMAX)"
+      },
+      "request_fields": {
+        "duration_minutes": {
+          "type": "integer",
+          "required": true,
+          "description": "مدت زمان به دقیقه"
+        },
+        "genre_id": {
+          "type": "integer",
+          "required": true,
+          "description": "شناسه ژانر"
+        },
+        "is_published": {
+          "type": "boolean",
+          "required": true,
+          "description": "وضعیت انتشار"
+        },
+        "release_year": {
+          "type": "integer",
+          "required": true,
+          "description": "سال ساخت"
+        },
+        "slug": {
+          "type": "string",
+          "required": true,
+          "description": "اسلاگ"
+        },
+        "synopsis": {
+          "type": "string",
+          "required": false,
+          "description": "خلاصه داستان"
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "عنوان فیلم"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "id": 2,
+          "slug": "interstellar-imax",
+          "title": "Interstellar (IMAX)"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X PUT \"http://localhost:8080/api/v1/admin/movies/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"title\":\"Interstellar (IMAX)\",\"slug\":\"interstellar-imax\",\"release_year\":2014,\"duration_minutes\":169,\"genre_id\":1,\"is_published\":true}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/movies/2\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ title: \"Interstellar (IMAX)\", slug: \"interstellar-imax\", release_year: 2014, duration_minutes: 169, genre_id: 1, is_published: true })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Movies/Update-Movie.bru"
+      }
+    },
+    {
+      "name": "Delete Movie",
+      "category": "Admin-Movies",
+      "method": "DELETE",
+      "path": "/api/v1/admin/movies/{id}",
+      "url": "http://localhost:8080/api/v1/admin/movies/2",
+      "description": "حذف فیلم و وابستگی‌های آن از سامانه",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 2,
+          "description": "شناسه فیلم"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "movie deleted successfully"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X DELETE \"http://localhost:8080/api/v1/admin/movies/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/movies/2\", {\n  method: \"DELETE\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Movies/Delete-Movie.bru"
+      }
+    },
+    {
+      "name": "Create Series",
+      "category": "Admin-Series",
+      "method": "POST",
+      "path": "/api/v1/admin/series",
+      "url": "http://localhost:8080/api/v1/admin/series",
+      "description": "ایجاد یک سریال جدید در کاتالوگ",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "description": "When a young boy vanishes, a small town uncovers a mystery...",
+        "is_published": true,
+        "release_year": 2016,
+        "slug": "stranger-things",
+        "title": "Stranger Things"
+      },
+      "request_fields": {
+        "description": {
+          "type": "string",
+          "required": false,
+          "description": "توضیحات سریال"
+        },
+        "is_published": {
+          "type": "boolean",
+          "required": true,
+          "description": "وضعیت انتشار"
+        },
+        "release_year": {
+          "type": "integer",
+          "required": true,
+          "description": "سال آغاز انتشار"
+        },
+        "slug": {
+          "type": "string",
+          "required": true,
+          "description": "اسلاگ یکتا"
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "عنوان سریال"
+        }
+      },
+      "response_example": {
+        "status": 201,
+        "body": {
+          "id": 2,
+          "is_published": true,
+          "release_year": 2016,
+          "slug": "stranger-things",
+          "title": "Stranger Things"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/admin/series\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"title\":\"Stranger Things\",\"slug\":\"stranger-things\",\"release_year\":2016,\"is_published\":true}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/series\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ title: \"Stranger Things\", slug: \"stranger-things\", release_year: 2016, is_published: true })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Series/Create-Series.bru"
+      }
+    },
+    {
+      "name": "Update Series",
+      "category": "Admin-Series",
+      "method": "PUT",
+      "path": "/api/v1/admin/series/{id}",
+      "url": "http://localhost:8080/api/v1/admin/series/2",
+      "description": "ویرایش مشخصات سریال",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 2,
+          "description": "شناسه سریال"
+        }
+      },
+      "query_params": {},
+      "request_body": {
+        "description": "Updated description...",
+        "is_published": true,
+        "release_year": 2016,
+        "slug": "stranger-things",
+        "title": "Stranger Things Updated"
+      },
+      "request_fields": {
+        "description": {
+          "type": "string",
+          "required": false,
+          "description": "توضیحات"
+        },
+        "is_published": {
+          "type": "boolean",
+          "required": true,
+          "description": "وضعیت انتشار"
+        },
+        "release_year": {
+          "type": "integer",
+          "required": true,
+          "description": "سال انتشار"
+        },
+        "slug": {
+          "type": "string",
+          "required": true,
+          "description": "اسلاگ"
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "عنوان جدید"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "id": 2,
+          "title": "Stranger Things Updated"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X PUT \"http://localhost:8080/api/v1/admin/series/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"title\":\"Stranger Things Updated\",\"slug\":\"stranger-things\",\"release_year\":2016,\"is_published\":true}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/series/2\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ title: \"Stranger Things Updated\", slug: \"stranger-things\", release_year: 2016, is_published: true })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Series/Update-Series.bru"
+      }
+    },
+    {
+      "name": "Delete Series",
+      "category": "Admin-Series",
+      "method": "DELETE",
+      "path": "/api/v1/admin/series/{id}",
+      "url": "http://localhost:8080/api/v1/admin/series/2",
+      "description": "حذف کامل یک سریال و فصل‌ها و قسمت‌های وابسته به آن",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 2,
+          "description": "شناسه سریال"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "series deleted successfully"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X DELETE \"http://localhost:8080/api/v1/admin/series/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/series/2\", {\n  method: \"DELETE\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Series/Delete-Series.bru"
+      }
+    },
+    {
+      "name": "Create Season",
+      "category": "Admin-Seasons",
+      "method": "POST",
+      "path": "/api/v1/admin/seasons",
+      "url": "http://localhost:8080/api/v1/admin/seasons",
+      "description": "افزودن یک فصل به یک سریال موجود",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "season_number": 2,
+        "series_id": 1,
+        "synopsis": "The story continues with higher stakes",
+        "title": "Season 2"
+      },
+      "request_fields": {
+        "season_number": {
+          "type": "integer",
+          "required": true,
+          "description": "شماره فصل"
+        },
+        "series_id": {
+          "type": "integer",
+          "required": true,
+          "description": "شناسه سریال والد"
+        },
+        "synopsis": {
+          "type": "string",
+          "required": false,
+          "description": "خلاصه فصل"
+        },
+        "title": {
+          "type": "string",
+          "required": false,
+          "description": "عنوان اختیاری فصل"
+        }
+      },
+      "response_example": {
+        "status": 201,
+        "body": {
+          "id": 2,
+          "season_number": 2,
+          "series_id": 1,
+          "title": "Season 2"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/admin/seasons\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"series_id\":1,\"season_number\":2,\"title\":\"Season 2\",\"synopsis\":\"The story continues\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/seasons\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ series_id: 1, season_number: 2, title: \"Season 2\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Seasons/Create-Season.bru"
+      }
+    },
+    {
+      "name": "Update Season",
+      "category": "Admin-Seasons",
+      "method": "PUT",
+      "path": "/api/v1/admin/seasons/{id}",
+      "url": "http://localhost:8080/api/v1/admin/seasons/2",
+      "description": "ویرایش عنوان و شماره فصل",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 2,
+          "description": "شناسه فصل"
+        }
+      },
+      "query_params": {},
+      "request_body": {
+        "season_number": 2,
+        "synopsis": "Updated synopsis",
+        "title": "Season 2 (Special)"
+      },
+      "request_fields": {
+        "season_number": {
+          "type": "integer",
+          "required": true,
+          "description": "شماره فصل"
+        },
+        "synopsis": {
+          "type": "string",
+          "required": false,
+          "description": "خلاصه"
+        },
+        "title": {
+          "type": "string",
+          "required": false,
+          "description": "عنوان"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "id": 2,
+          "season_number": 2,
+          "title": "Season 2 (Special)"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X PUT \"http://localhost:8080/api/v1/admin/seasons/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"season_number\":2,\"title\":\"Season 2 (Special)\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/seasons/2\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ season_number: 2, title: \"Season 2 (Special)\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Seasons/Update-Season.bru"
+      }
+    },
+    {
+      "name": "Delete Season",
+      "category": "Admin-Seasons",
+      "method": "DELETE",
+      "path": "/api/v1/admin/seasons/{id}",
+      "url": "http://localhost:8080/api/v1/admin/seasons/2",
+      "description": "حذف یک فصل و قسمت‌های وابسته به آن",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 2,
+          "description": "شناسه فصل"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "season deleted successfully"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X DELETE \"http://localhost:8080/api/v1/admin/seasons/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/seasons/2\", {\n  method: \"DELETE\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Seasons/Delete-Season.bru"
+      }
+    },
+    {
+      "name": "Create Episode",
+      "category": "Admin-Episodes",
+      "method": "POST",
+      "path": "/api/v1/admin/episodes",
+      "url": "http://localhost:8080/api/v1/admin/episodes",
+      "description": "افزودن یک قسمت جدید به یک فصل",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "duration_minutes": 48,
+        "episode_number": 2,
+        "is_published": true,
+        "season_id": 1,
+        "synopsis": "Walt and Jesse attempt to dispose of two bodies",
+        "title": "Cat's in the Bag..."
+      },
+      "request_fields": {
+        "duration_minutes": {
+          "type": "integer",
+          "required": true,
+          "description": "مدت زمان به دقیقه"
+        },
+        "episode_number": {
+          "type": "integer",
+          "required": true,
+          "description": "شماره قسمت"
+        },
+        "is_published": {
+          "type": "boolean",
+          "required": true,
+          "description": "وضعیت انتشار"
+        },
+        "season_id": {
+          "type": "integer",
+          "required": true,
+          "description": "شناسه فصل والد"
+        },
+        "synopsis": {
+          "type": "string",
+          "required": false,
+          "description": "خلاصه اپیزود"
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "عنوان اپیزود"
+        }
+      },
+      "response_example": {
+        "status": 201,
+        "body": {
+          "duration_minutes": 48,
+          "episode_number": 2,
+          "id": 2,
+          "is_published": true,
+          "season_id": 1,
+          "title": "Cat's in the Bag..."
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/admin/episodes\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"season_id\":1,\"episode_number\":2,\"title\":\"Cat'\\''s in the Bag...\",\"duration_minutes\":48,\"is_published\":true}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/episodes\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ season_id: 1, episode_number: 2, title: \"Cat's in the Bag...\", duration_minutes: 48, is_published: true })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Episodes/Create-Episode.bru"
+      }
+    },
+    {
+      "name": "Update Episode",
+      "category": "Admin-Episodes",
+      "method": "PUT",
+      "path": "/api/v1/admin/episodes/{id}",
+      "url": "http://localhost:8080/api/v1/admin/episodes/2",
+      "description": "ویرایش اطلاعات یک اپیزود",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 2,
+          "description": "شناسه اپیزود"
+        }
+      },
+      "query_params": {},
+      "request_body": {
+        "duration_minutes": 48,
+        "episode_number": 2,
+        "is_published": true,
+        "synopsis": "Updated episode synopsis",
+        "title": "Cat's in the Bag (Remastered)"
+      },
+      "request_fields": {
+        "duration_minutes": {
+          "type": "integer",
+          "required": true,
+          "description": "مدت زمان"
+        },
+        "episode_number": {
+          "type": "integer",
+          "required": true,
+          "description": "شماره قسمت"
+        },
+        "is_published": {
+          "type": "boolean",
+          "required": true,
+          "description": "وضعیت انتشار"
+        },
+        "synopsis": {
+          "type": "string",
+          "required": false,
+          "description": "خلاصه"
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "عنوان"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "id": 2,
+          "title": "Cat's in the Bag (Remastered)"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X PUT \"http://localhost:8080/api/v1/admin/episodes/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"episode_number\":2,\"title\":\"Cat'\\''s in the Bag (Remastered)\",\"duration_minutes\":48,\"is_published\":true}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/episodes/2\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ episode_number: 2, title: \"Cat's in the Bag (Remastered)\", duration_minutes: 48, is_published: true })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Episodes/Update-Episode.bru"
+      }
+    },
+    {
+      "name": "Delete Episode",
+      "category": "Admin-Episodes",
+      "method": "DELETE",
+      "path": "/api/v1/admin/episodes/{id}",
+      "url": "http://localhost:8080/api/v1/admin/episodes/2",
+      "description": "حذف یک قسمت سریال",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 2,
+          "description": "شناسه اپیزود"
+        }
+      },
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "episode deleted successfully"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X DELETE \"http://localhost:8080/api/v1/admin/episodes/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/episodes/2\", {\n  method: \"DELETE\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Episodes/Delete-Episode.bru"
+      }
+    },
+    {
+      "name": "Initiate Presigned S3 Upload",
+      "category": "Admin-Media",
+      "method": "POST",
+      "path": "/api/v1/admin/media/uploads",
+      "url": "http://localhost:8080/api/v1/admin/media/uploads",
+      "description": "ایجاد لینک امضا شده موقت S3 (Presigned PUT) برای آپلود مستقیم ویدیوی باکیفیت یا پوستر از فرانت‌اند",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "content_type": "video/mp4",
+        "kind": "video",
+        "size_bytes": 1048576000,
+        "target_id": 1,
+        "target_type": "movie"
+      },
+      "request_fields": {
+        "content_type": {
+          "type": "string",
+          "required": true,
+          "description": "MIME type فایل (مثلاً video/mp4)"
+        },
+        "kind": {
+          "type": "string",
+          "required": true,
+          "description": "نوع است: 'video', 'trailer', 'poster'"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "required": true,
+          "description": "حجم فایل به بایت"
+        },
+        "target_id": {
+          "type": "integer",
+          "required": true,
+          "description": "شناسه فیلم یا اپیزود هدف"
+        },
+        "target_type": {
+          "type": "string",
+          "required": true,
+          "description": "'movie' یا 'episode'"
+        }
+      },
+      "response_example": {
+        "status": 201,
+        "body": {
+          "expires_in": 3600,
+          "storage_key": "movies/1/video/source.mp4",
+          "upload_url": "https://s3.example.com/bucket/movies/1/video/source.mp4?X-Amz-Signature=..."
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/admin/media/uploads\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"target_type\":\"movie\",\"target_id\":1,\"kind\":\"video\",\"content_type\":\"video/mp4\",\"size_bytes\":1048576000}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/media/uploads\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ target_type: \"movie\", target_id: 1, kind: \"video\", content_type: \"video/mp4\", size_bytes: 1048576000 })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Media/Initiate-Media-Upload.bru"
+      }
+    },
+    {
+      "name": "Complete And Verify S3 Upload",
+      "category": "Admin-Media",
+      "method": "POST",
+      "path": "/api/v1/admin/media/uploads/complete",
+      "url": "http://localhost:8080/api/v1/admin/media/uploads/complete",
+      "description": "راستی‌آزمایی وجود فایل در باکت S3 و ثبت در دیتابیس و قرارگیری خودکار در صف ترنسکود HLS",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "kind": "video",
+        "storage_key": "movies/1/video/source.mp4",
+        "target_id": 1,
+        "target_type": "movie"
+      },
+      "request_fields": {
+        "kind": {
+          "type": "string",
+          "required": true,
+          "description": "'video', 'trailer', 'poster'"
+        },
+        "storage_key": {
+          "type": "string",
+          "required": true,
+          "description": "کلید آبجکت استوریج ذخیره‌شده"
+        },
+        "target_id": {
+          "type": "integer",
+          "required": true,
+          "description": "شناسه هدف"
+        },
+        "target_type": {
+          "type": "string",
+          "required": true,
+          "description": "'movie' یا 'episode'"
+        }
+      },
+      "response_example": {
+        "status": 201,
+        "body": {
+          "asset": {
+            "id": 1,
+            "is_active": false,
+            "kind": "video",
+            "mime_type": "video/mp4",
+            "movie_id": 1,
+            "size_bytes": 1048576000,
+            "storage_key": "movies/1/video/source.mp4"
+          },
+          "message": "source upload verified; asset remains inactive until HLS processing completes",
+          "status": "uploaded_pending_processing"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/admin/media/uploads/complete\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"target_type\":\"movie\",\"target_id\":1,\"kind\":\"video\",\"storage_key\":\"movies/1/video/source.mp4\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/media/uploads/complete\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ target_type: \"movie\", target_id: 1, kind: \"video\", storage_key: \"movies/1/video/source.mp4\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Media/Complete-Media-Upload.bru"
+      }
+    },
+    {
+      "name": "Register Asset Manually",
+      "category": "Admin-Media",
+      "method": "POST",
+      "path": "/api/v1/admin/media/assets",
+      "url": "http://localhost:8080/api/v1/admin/media/assets",
+      "description": "ثبت دستی یک فایل رسانه‌ای آماده در سیستم (مثلاً پوستر در CDN یا لینک مستقیم)",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "kind": "poster",
+        "mime_type": "image/webp",
+        "movie_id": 1,
+        "playback_url": "https://storage.example.com/movies/1/poster.webp",
+        "size_bytes": 245000,
+        "storage_key": "movies/1/poster.webp"
+      },
+      "request_fields": {
+        "episode_id": {
+          "type": "integer",
+          "required": false,
+          "description": "شناسه قسمت (اگر برای قسمت است)"
+        },
+        "kind": {
+          "type": "string",
+          "required": true,
+          "description": "'video', 'trailer', 'poster'"
+        },
+        "mime_type": {
+          "type": "string",
+          "required": true,
+          "description": "MIME type"
+        },
+        "movie_id": {
+          "type": "integer",
+          "required": false,
+          "description": "شناسه فیلم (اگر برای فیلم است)"
+        },
+        "playback_url": {
+          "type": "string",
+          "required": false,
+          "description": "URL مستقیم در صورت وجود"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "required": true,
+          "description": "حجم فایل به بایت"
+        },
+        "storage_key": {
+          "type": "string",
+          "required": true,
+          "description": "کلید ذخیره‌سازی در باکت"
+        }
+      },
+      "response_example": {
+        "status": 201,
+        "body": {
+          "id": 2,
+          "kind": "poster",
+          "movie_id": 1,
+          "playback_url": "https://storage.example.com/movies/1/poster.webp",
+          "storage_key": "movies/1/poster.webp"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/admin/media/assets\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"movie_id\":1,\"kind\":\"poster\",\"storage_key\":\"movies/1/poster.webp\",\"mime_type\":\"image/webp\",\"size_bytes\":245000,\"playback_url\":\"https://storage.example.com/movies/1/poster.webp\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/media/assets\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ movie_id: 1, kind: \"poster\", storage_key: \"movies/1/poster.webp\", mime_type: \"image/webp\", size_bytes: 245000, playback_url: \"https://storage.example.com/movies/1/poster.webp\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Media/Register-Asset-Manual.bru"
+      }
+    },
+    {
+      "name": "Queue Subtitle Generation Job",
+      "category": "Admin-Media",
+      "method": "POST",
+      "path": "/api/v1/admin/media/subtitle-jobs",
+      "url": "http://localhost:8080/api/v1/admin/media/subtitle-jobs",
+      "description": "ارسال کار استخراج صوت و تولید زیرنویس هوش مصنوعی به صف پردازش ورکر",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "source_asset_id": 1,
+        "source_language": "en",
+        "target_language": "fa"
+      },
+      "request_fields": {
+        "source_asset_id": {
+          "type": "integer",
+          "required": true,
+          "description": "شناسه فایل ویدیوی مرجع"
+        },
+        "source_language": {
+          "type": "string",
+          "required": true,
+          "description": "زبان صوت فیلم (مثلاً 'en')"
+        },
+        "target_language": {
+          "type": "string",
+          "required": true,
+          "description": "زبان مقصد زیرنویس (مثلاً 'fa')"
+        }
+      },
+      "response_example": {
+        "status": 201,
+        "body": {
+          "job_id": 1,
+          "source_asset_id": 1,
+          "status": "queued",
+          "target_language": "fa"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/admin/media/subtitle-jobs\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"source_asset_id\":1,\"source_language\":\"en\",\"target_language\":\"fa\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/media/subtitle-jobs\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ source_asset_id: 1, source_language: \"en\", target_language: \"fa\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Media/Queue-Subtitle-Job.bru"
+      }
+    },
+    {
+      "name": "Publish Subtitle",
+      "category": "Admin-Media",
+      "method": "PATCH",
+      "path": "/api/v1/admin/media/subtitles/{id}/publish",
+      "url": "http://localhost:8080/api/v1/admin/media/subtitles/1/publish",
+      "description": "تغییر وضعیت انتشار زیرنویس (قابل دسترسی عمومی برای بینندگان یا مخفی)",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه زیرنویس"
+        }
+      },
+      "query_params": {},
+      "request_body": {
+        "is_published": true
+      },
+      "request_fields": {
+        "is_published": {
+          "type": "boolean",
+          "required": true,
+          "description": "وضعیت انتشار (true/false)"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "id": 1,
+          "is_published": true,
+          "message": "subtitle publication status updated"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X PATCH \"http://localhost:8080/api/v1/admin/media/subtitles/1/publish\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"is_published\":true}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/media/subtitles/1/publish\", {\n  method: \"PATCH\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ is_published: true })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Media/Publish-Subtitle.bru"
+      }
+    },
+    {
+      "name": "List All Ad Campaigns",
+      "category": "Admin-Ads",
+      "method": "GET",
+      "path": "/api/v1/ads",
+      "url": "http://localhost:8080/api/v1/ads",
+      "description": "لیست کامل کمپین‌های تبلیغاتی شامل کمپین‌های فعال، منقضی شده یا پیش‌نویس",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+      },
+      "url_params": {},
+      "query_params": {
+        "placement": {
+          "type": "string",
+          "required": false,
+          "description": "فیلتر بر اساس جایگاه"
+        }
+      },
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "click_url": "https://brand.test",
+              "end_at": "2026-08-31T23:59:59Z",
+              "id": 1,
+              "is_active": true,
+              "media_url": "https://cdn.example.com/ad.mp4",
+              "placement": "preroll",
+              "start_at": "2026-06-01T00:00:00Z",
+              "title": "Summer Campaign"
+            }
+          ]
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X GET \"http://localhost:8080/api/v1/ads\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/ads\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Ads/List-Campaigns.bru"
+      }
+    },
+    {
+      "name": "Create Ad Campaign",
+      "category": "Admin-Ads",
+      "method": "POST",
+      "path": "/api/v1/ads",
+      "url": "http://localhost:8080/api/v1/ads",
+      "description": "ایجاد یک کمپین تبلیغاتی جدید با زمان‌بندی و لینک فرود",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "click_url": "https://sponsor.test/spring",
+        "end_at": "2026-04-01T00:00:00Z",
+        "is_active": true,
+        "media_url": "https://cdn.example.com/spring.mp4",
+        "placement": "preroll",
+        "start_at": "2026-03-01T00:00:00Z",
+        "title": "Spring Promo"
+      },
+      "request_fields": {
+        "click_url": {
+          "type": "string",
+          "required": true,
+          "description": "آدرس سایت هدف هنگام کلیک"
+        },
+        "end_at": {
+          "type": "string",
+          "required": true,
+          "format": "date-time",
+          "description": "تاریخ پایان"
+        },
+        "is_active": {
+          "type": "boolean",
+          "required": true,
+          "description": "فعال بودن کمپین"
+        },
+        "media_url": {
+          "type": "string",
+          "required": true,
+          "description": "آدرس فایل ویدیو یا بنر"
+        },
+        "placement": {
+          "type": "string",
+          "required": true,
+          "description": "'preroll', 'midroll', 'banner'"
+        },
+        "start_at": {
+          "type": "string",
+          "required": true,
+          "format": "date-time",
+          "description": "تاریخ شروع"
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "عنوان کمپین"
+        }
+      },
+      "response_example": {
+        "status": 201,
+        "body": {
+          "id": 2,
+          "is_active": true,
+          "placement": "preroll",
+          "title": "Spring Promo"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/ads\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"title\":\"Spring Promo\",\"placement\":\"preroll\",\"media_url\":\"https://cdn.example.com/spring.mp4\",\"click_url\":\"https://sponsor.test/spring\",\"is_active\":true,\"start_at\":\"2026-03-01T00:00:00Z\",\"end_at\":\"2026-04-01T00:00:00Z\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/ads\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ title: \"Spring Promo\", placement: \"preroll\", media_url: \"https://cdn.example.com/spring.mp4\", click_url: \"https://sponsor.test/spring\", is_active: true, start_at: \"2026-03-01T00:00:00Z\", end_at: \"2026-04-01T00:00:00Z\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Ads/Create-Campaign.bru"
+      }
+    },
+    {
+      "name": "Update Ad Campaign",
+      "category": "Admin-Ads",
+      "method": "PUT",
+      "path": "/api/v1/ads/{id}",
+      "url": "http://localhost:8080/api/v1/ads/2",
+      "description": "ویرایش مشخصات یا تمدید زمان یک کمپین تبلیغاتی",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 2,
+          "description": "شناسه کمپین"
+        }
+      },
+      "query_params": {},
+      "request_body": {
+        "click_url": "https://sponsor.test/spring",
+        "end_at": "2026-04-15T00:00:00Z",
+        "is_active": true,
+        "media_url": "https://cdn.example.com/spring.mp4",
+        "placement": "preroll",
+        "start_at": "2026-03-01T00:00:00Z",
+        "title": "Spring Promo Extended"
+      },
+      "request_fields": {
+        "click_url": {
+          "type": "string",
+          "required": true,
+          "description": "لینک فرود"
+        },
+        "end_at": {
+          "type": "string",
+          "required": true,
+          "format": "date-time",
+          "description": "تاریخ پایان"
+        },
+        "is_active": {
+          "type": "boolean",
+          "required": true,
+          "description": "وضعیت"
+        },
+        "media_url": {
+          "type": "string",
+          "required": true,
+          "description": "فایل مدیا"
+        },
+        "placement": {
+          "type": "string",
+          "required": true,
+          "description": "جایگاه"
+        },
+        "start_at": {
+          "type": "string",
+          "required": true,
+          "format": "date-time",
+          "description": "تاریخ شروع"
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "عنوان"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "id": 2,
+          "title": "Spring Promo Extended"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X PUT \"http://localhost:8080/api/v1/ads/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"title\":\"Spring Promo Extended\",\"placement\":\"preroll\",\"media_url\":\"https://cdn.example.com/spring.mp4\",\"click_url\":\"https://sponsor.test/spring\",\"is_active\":true,\"start_at\":\"2026-03-01T00:00:00Z\",\"end_at\":\"2026-04-15T00:00:00Z\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/ads/2\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ title: \"Spring Promo Extended\", placement: \"preroll\", media_url: \"https://cdn.example.com/spring.mp4\", click_url: \"https://sponsor.test/spring\", is_active: true, start_at: \"2026-03-01T00:00:00Z\", end_at: \"2026-04-15T00:00:00Z\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Ads/Update-Campaign.bru"
+      }
+    },
+    {
+      "name": "Broadcast Notification",
+      "category": "Admin-Notifications",
+      "method": "POST",
+      "path": "/api/v1/notifications/broadcast",
+      "url": "http://localhost:8080/api/v1/notifications/broadcast",
+      "description": "ارسال اعلان همگانی (Broadcast) به تمام کاربران فعال سامانه",
+      "auth": {
+        "required": true,
+        "type": "bearer_admin",
+        "description": "نیازمند توکن مدیر"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": {
+        "message": "Scheduled maintenance tonight at 02:00 AM UTC.",
+        "title": "System Maintenance"
+      },
+      "request_fields": {
+        "message": {
+          "type": "string",
+          "required": true,
+          "description": "متن کامل پیام"
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "عنوان اعلان همگانی"
+        }
+      },
+      "response_example": {
+        "status": 201,
+        "body": {
+          "message": "broadcast notification dispatched to all active users"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/api/v1/notifications/broadcast\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"title\":\"System Maintenance\",\"message\":\"Scheduled maintenance tonight at 02:00 AM UTC.\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/notifications/broadcast\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ title: \"System Maintenance\", message: \"Scheduled maintenance tonight at 02:00 AM UTC.\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Admin-Notifications/Broadcast-Notification.bru"
+      }
+    },
+    {
+      "name": "Claim Next Subtitle Job",
+      "category": "Worker",
+      "method": "POST",
+      "path": "/internal/v1/worker/subtitle-jobs/claim",
+      "url": "http://localhost:8080/internal/v1/worker/subtitle-jobs/claim",
+      "description": "تحویل گرفتن و قفل کردن جاب بعدی تولید زیرنویس از صف پردازش توسط ورکر",
+      "auth": {
+        "required": true,
+        "type": "worker_token",
+        "description": "نیازمند SUBTITLE_WORKER_TOKEN در هدر Bearer"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_WORKER_TOKEN>"
+      },
+      "url_params": {},
+      "query_params": {},
+      "request_body": null,
+      "request_fields": {},
+      "response_example": {
+        "status": 200,
+        "body": {
+          "job": {
+            "id": 1,
+            "source_asset_id": 1,
+            "source_language": "en",
+            "status": "processing",
+            "target_language": "fa"
+          },
+          "source_video_url": "https://s3.example.com/download/source.mp4?..."
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/internal/v1/worker/subtitle-jobs/claim\" \\\n  -H \"Authorization: Bearer <YOUR_WORKER_TOKEN>\"",
+        "javascript_fetch": "fetch(\"http://localhost:8080/internal/v1/worker/subtitle-jobs/claim\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + workerToken }\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Worker/Claim-Subtitle-Job.bru"
+      }
+    },
+    {
+      "name": "Complete Subtitle Job",
+      "category": "Worker",
+      "method": "POST",
+      "path": "/internal/v1/worker/subtitle-jobs/{id}/complete",
+      "url": "http://localhost:8080/internal/v1/worker/subtitle-jobs/1/complete",
+      "description": "ثبت اتمام موفق پردازش جاب همراه با لینک فایل زیرنویس تولید شده یا ثبت خطا",
+      "auth": {
+        "required": true,
+        "type": "worker_token",
+        "description": "نیازمند SUBTITLE_WORKER_TOKEN"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_WORKER_TOKEN>",
+        "Content-Type": "application/json"
+      },
+      "url_params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "example": 1,
+          "description": "شناسه جاب"
+        }
+      },
+      "query_params": {},
+      "request_body": {
+        "download_url": "https://storage.example.com/subtitles/job1_fa.vtt",
+        "error_message": "",
+        "status": "completed"
+      },
+      "request_fields": {
+        "download_url": {
+          "type": "string",
+          "required": false,
+          "description": "آدرس دانلود فایل نهایی زیرنویس در صورت موفقیت"
+        },
+        "error_message": {
+          "type": "string",
+          "required": false,
+          "description": "پیام خطا در صورت شکست"
+        },
+        "status": {
+          "type": "string",
+          "required": true,
+          "description": "'completed' یا 'failed'"
+        }
+      },
+      "response_example": {
+        "status": 200,
+        "body": {
+          "message": "job completed and subtitle registered"
+        }
+      },
+      "how_to_run": {
+        "curl": "curl -X POST \"http://localhost:8080/internal/v1/worker/subtitle-jobs/1/complete\" \\\n  -H \"Authorization: Bearer <YOUR_WORKER_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"status\":\"completed\",\"download_url\":\"https://storage.example.com/subtitles/job1_fa.vtt\",\"error_message\":\"\"}'",
+        "javascript_fetch": "fetch(\"http://localhost:8080/internal/v1/worker/subtitle-jobs/1/complete\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + workerToken, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ status: \"completed\", download_url: \"https://storage.example.com/subtitles/job1_fa.vtt\", error_message: \"\" })\n}).then(r => r.json()).then(console.log);",
+        "bruno": "bruno/Worker/Complete-Subtitle-Job.bru"
+      }
+    }
+  ],
+  "title": "Movie Platform Backend API Endpoints Catalog",
+  "total_endpoints": 68,
+  "version": "1.0.0"
+}

@@ -1,0 +1,43 @@
+﻿{
+  "name": "Update User Profile",
+  "category": "Users",
+  "method": "PATCH",
+  "path": "/api/v1/profile",
+  "url": "http://localhost:8080/api/v1/profile",
+  "description": "ویرایش اطلاعات قابل تغییر پروفایل (مانند نام کاربر)",
+  "auth": {
+    "required": true,
+    "type": "bearer_user",
+    "description": "نیازمند JWT Bearer Token کاربر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": {
+    "name": "Hosein Khashayarpour (Updated)"
+  },
+  "request_fields": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "نام جدید کاربر"
+    }
+  },
+  "response_example": {
+    "status": 200,
+    "body": {
+      "email": "hosein@example.com",
+      "id": 1,
+      "name": "Hosein Khashayarpour (Updated)",
+      "role": "user"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X PATCH \"http://localhost:8080/api/v1/profile\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"Hosein Khashayarpour (Updated)\"}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/profile\", {\n  method: \"PATCH\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ name: \"Hosein Khashayarpour (Updated)\" })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Users/Update-Profile.bru"
+  }
+}

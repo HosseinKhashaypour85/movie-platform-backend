@@ -1,0 +1,49 @@
+﻿{
+  "name": "Set User Role",
+  "category": "Admin-Users",
+  "method": "PATCH",
+  "path": "/api/v1/admin/users/{id}/role",
+  "url": "http://localhost:8080/api/v1/admin/users/1/role",
+  "description": "تغییر نقش کاربر به 'user'، 'admin' یا 'super_admin' (فقط توسط سوپر ادمین)",
+  "auth": {
+    "required": true,
+    "type": "bearer_super_admin",
+    "description": "نیازمند نقش Super Admin"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_SUPER_ADMIN_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 1,
+      "description": "شناسه کاربر هدف"
+    }
+  },
+  "query_params": {},
+  "request_body": {
+    "role": "admin"
+  },
+  "request_fields": {
+    "role": {
+      "type": "string",
+      "required": true,
+      "description": "نقش جدید: 'user', 'admin', 'super_admin'"
+    }
+  },
+  "response_example": {
+    "status": 200,
+    "body": {
+      "id": 1,
+      "message": "user role updated",
+      "role": "admin"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X PATCH \"http://localhost:8080/api/v1/admin/users/1/role\" \\\n  -H \"Authorization: Bearer <YOUR_SUPER_ADMIN_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"role\":\"admin\"}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/users/1/role\", {\n  method: \"PATCH\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ role: \"admin\" })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Users/Set-User-Role.bru"
+  }
+}

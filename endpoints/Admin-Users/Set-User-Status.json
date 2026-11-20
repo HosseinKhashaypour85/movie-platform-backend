@@ -1,0 +1,49 @@
+﻿{
+  "name": "Set User Active Status",
+  "category": "Admin-Users",
+  "method": "PATCH",
+  "path": "/api/v1/admin/users/{id}/status",
+  "url": "http://localhost:8080/api/v1/admin/users/1/status",
+  "description": "فعال‌سازی یا مسدودسازی حساب کاربری توسط مدیر",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 1,
+      "description": "شناسه کاربر هدف"
+    }
+  },
+  "query_params": {},
+  "request_body": {
+    "is_active": false
+  },
+  "request_fields": {
+    "is_active": {
+      "type": "boolean",
+      "required": true,
+      "description": "وضعیت فعال (true) یا غیرفعال (false)"
+    }
+  },
+  "response_example": {
+    "status": 200,
+    "body": {
+      "id": 1,
+      "is_active": false,
+      "message": "user status updated"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X PATCH \"http://localhost:8080/api/v1/admin/users/1/status\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"is_active\":false}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/users/1/status\", {\n  method: \"PATCH\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ is_active: false })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Users/Set-User-Status.bru"
+  }
+}

@@ -1,0 +1,51 @@
+﻿{
+  "name": "List Published Subtitles",
+  "category": "Playback",
+  "method": "GET",
+  "path": "/api/v1/media/{kind}/{id}/subtitles",
+  "url": "http://localhost:8080/api/v1/media/movies/1/subtitles",
+  "description": "دریافت زیرنویس‌های منتشر شده و آماده دانلود برای یک فیلم یا اپیزود",
+  "auth": {
+    "required": false,
+    "type": "none",
+    "description": "اندپوینت عمومی"
+  },
+  "headers": {},
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 1,
+      "description": "شناسه فیلم یا قسمت"
+    },
+    "kind": {
+      "type": "string",
+      "required": true,
+      "example": "movies",
+      "description": "'movies' یا 'episodes'"
+    }
+  },
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "download_url": "https://storage.example.com/subtitles/1_fa.vtt",
+          "format": "vtt",
+          "id": 1,
+          "is_generated": true,
+          "label": "Persian",
+          "language": "fa"
+        }
+      ]
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/media/movies/1/subtitles\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/media/movies/1/subtitles\").then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Playback/List-Subtitles.bru"
+  }
+}

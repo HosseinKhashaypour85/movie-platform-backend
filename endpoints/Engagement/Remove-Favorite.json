@@ -1,0 +1,38 @@
+﻿{
+  "name": "Remove Movie From Favorites",
+  "category": "Engagement",
+  "method": "DELETE",
+  "path": "/api/v1/favorites/{movieID}",
+  "url": "http://localhost:8080/api/v1/favorites/1",
+  "description": "حذف فیلم از فهرست برگزیده‌های کاربر",
+  "auth": {
+    "required": true,
+    "type": "bearer_user",
+    "description": "نیازمند توکن کاربر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+  },
+  "url_params": {
+    "movieID": {
+      "type": "integer",
+      "required": true,
+      "example": 1,
+      "description": "شناسه فیلم"
+    }
+  },
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "message": "movie removed from favorites"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X DELETE \"http://localhost:8080/api/v1/favorites/1\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/favorites/1\", {\n  method: \"DELETE\",\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Engagement/Remove-Favorite.bru"
+  }
+}

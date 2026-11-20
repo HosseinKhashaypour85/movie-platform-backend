@@ -1,0 +1,72 @@
+﻿{
+  "name": "List Published Movies",
+  "category": "Catalog",
+  "method": "GET",
+  "path": "/api/v1/catalog/movies",
+  "url": "http://localhost:8080/api/v1/catalog/movies?limit=20&offset=0&genre_id=1&year=2024&q=Inception",
+  "description": "دریافت لیست فیلم‌های منتشر شده با قابلیت جستجوی متنی، فیلتر ژانر، سال ساخت و صفحه‌بندی",
+  "auth": {
+    "required": false,
+    "type": "none",
+    "description": "اندپوینت عمومی"
+  },
+  "headers": {},
+  "url_params": {},
+  "query_params": {
+    "genre_id": {
+      "type": "integer",
+      "required": false,
+      "description": "فیلتر بر اساس شناسه ژانر"
+    },
+    "limit": {
+      "type": "integer",
+      "required": false,
+      "default": 20,
+      "description": "تعداد آیتم‌ها در هر صفحه"
+    },
+    "offset": {
+      "type": "integer",
+      "required": false,
+      "default": 0,
+      "description": "تعداد آفست برای صفحه‌بندی"
+    },
+    "q": {
+      "type": "string",
+      "required": false,
+      "description": "کلمه کلیدی جهت جستجو در عنوان یا خلاصه"
+    },
+    "year": {
+      "type": "integer",
+      "required": false,
+      "description": "فیلتر بر اساس سال انتشار"
+    }
+  },
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "duration_minutes": 148,
+          "genre_id": 1,
+          "id": 1,
+          "is_published": true,
+          "poster_url": "https://storage.example.com/movies/1/poster.webp",
+          "release_year": 2010,
+          "slug": "inception",
+          "synopsis": "A thief who steals corporate secrets...",
+          "title": "Inception"
+        }
+      ],
+      "limit": 20,
+      "offset": 0,
+      "total": 1
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/catalog/movies?limit=20&offset=0\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/catalog/movies?limit=20&offset=0\").then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Catalog/List-Movies.bru"
+  }
+}

@@ -1,0 +1,38 @@
+﻿{
+  "name": "List Favorite Movies",
+  "category": "Engagement",
+  "method": "GET",
+  "path": "/api/v1/favorites",
+  "url": "http://localhost:8080/api/v1/favorites",
+  "description": "دریافت لیست فیلم‌های برگزیده و نشان‌شده کاربر",
+  "auth": {
+    "required": true,
+    "type": "bearer_user",
+    "description": "نیازمند توکن کاربر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": 1,
+          "poster_url": "https://storage.example.com/movies/1/poster.webp",
+          "slug": "inception",
+          "title": "Inception"
+        }
+      ]
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/favorites\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/favorites\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Engagement/List-Favorites.bru"
+  }
+}

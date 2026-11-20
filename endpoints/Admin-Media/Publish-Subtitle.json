@@ -1,0 +1,49 @@
+﻿{
+  "name": "Publish Subtitle",
+  "category": "Admin-Media",
+  "method": "PATCH",
+  "path": "/api/v1/admin/media/subtitles/{id}/publish",
+  "url": "http://localhost:8080/api/v1/admin/media/subtitles/1/publish",
+  "description": "تغییر وضعیت انتشار زیرنویس (قابل دسترسی عمومی برای بینندگان یا مخفی)",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 1,
+      "description": "شناسه زیرنویس"
+    }
+  },
+  "query_params": {},
+  "request_body": {
+    "is_published": true
+  },
+  "request_fields": {
+    "is_published": {
+      "type": "boolean",
+      "required": true,
+      "description": "وضعیت انتشار (true/false)"
+    }
+  },
+  "response_example": {
+    "status": 200,
+    "body": {
+      "id": 1,
+      "is_published": true,
+      "message": "subtitle publication status updated"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X PATCH \"http://localhost:8080/api/v1/admin/media/subtitles/1/publish\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"is_published\":true}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/media/subtitles/1/publish\", {\n  method: \"PATCH\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ is_published: true })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Media/Publish-Subtitle.bru"
+  }
+}

@@ -1,0 +1,55 @@
+﻿{
+  "name": "Queue Subtitle Generation Job",
+  "category": "Admin-Media",
+  "method": "POST",
+  "path": "/api/v1/admin/media/subtitle-jobs",
+  "url": "http://localhost:8080/api/v1/admin/media/subtitle-jobs",
+  "description": "ارسال کار استخراج صوت و تولید زیرنویس هوش مصنوعی به صف پردازش ورکر",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": {
+    "source_asset_id": 1,
+    "source_language": "en",
+    "target_language": "fa"
+  },
+  "request_fields": {
+    "source_asset_id": {
+      "type": "integer",
+      "required": true,
+      "description": "شناسه فایل ویدیوی مرجع"
+    },
+    "source_language": {
+      "type": "string",
+      "required": true,
+      "description": "زبان صوت فیلم (مثلاً 'en')"
+    },
+    "target_language": {
+      "type": "string",
+      "required": true,
+      "description": "زبان مقصد زیرنویس (مثلاً 'fa')"
+    }
+  },
+  "response_example": {
+    "status": 201,
+    "body": {
+      "job_id": 1,
+      "source_asset_id": 1,
+      "status": "queued",
+      "target_language": "fa"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X POST \"http://localhost:8080/api/v1/admin/media/subtitle-jobs\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"source_asset_id\":1,\"source_language\":\"en\",\"target_language\":\"fa\"}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/media/subtitle-jobs\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ source_asset_id: 1, source_language: \"en\", target_language: \"fa\" })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Media/Queue-Subtitle-Job.bru"
+  }
+}

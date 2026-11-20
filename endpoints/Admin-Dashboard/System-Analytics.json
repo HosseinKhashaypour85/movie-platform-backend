@@ -1,0 +1,46 @@
+﻿{
+  "name": "Admin System Analytics",
+  "category": "Admin-Dashboard",
+  "method": "GET",
+  "path": "/api/v1/admin/analytics",
+  "url": "http://localhost:8080/api/v1/admin/analytics?window_days=30",
+  "description": "تحلیل‌های آماری پلتفرم شامل تعداد کل تماشاها، فیلم‌های پرمخاطب بر اساس بازه روز",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+  },
+  "url_params": {},
+  "query_params": {
+    "window_days": {
+      "type": "integer",
+      "required": false,
+      "default": 30,
+      "description": "بازه زمانی تحلیل (۷، ۳۰، یا ۹۰ روز)"
+    }
+  },
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "top_movies": [
+        {
+          "movie_id": 1,
+          "title": "Inception",
+          "views": 12000
+        }
+      ],
+      "total_views": 45000,
+      "window_days": 30
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/admin/analytics?window_days=30\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/analytics?window_days=30\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Dashboard/System-Analytics.bru"
+  }
+}

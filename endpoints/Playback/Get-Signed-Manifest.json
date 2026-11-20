@@ -1,0 +1,45 @@
+﻿{
+  "name": "Get Signed HLS Manifest",
+  "category": "Playback",
+  "method": "GET",
+  "path": "/api/v1/playback/{kind}/{id}",
+  "url": "http://localhost:8080/api/v1/playback/movies/1",
+  "description": "صدور URL امضا شده و دارای انقضای زمانی برای پخش استریم HLS ویدیوی فیلم یا اپیزود",
+  "auth": {
+    "required": true,
+    "type": "bearer_user",
+    "description": "نیازمند توکن کاربر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+  },
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 1,
+      "description": "شناسه فیلم یا قسمت سریال"
+    },
+    "kind": {
+      "type": "string",
+      "required": true,
+      "example": "movies",
+      "description": "نوع رسانه ('movies' یا 'episodes')"
+    }
+  },
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "expires_in": 7200,
+      "manifest_url": "https://gateway.example.com/hls/movies/1/master.m3u8?token=sig&expires=1700000000"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/playback/movies/1\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/playback/movies/1\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Playback/Get-Signed-Manifest.bru"
+  }
+}

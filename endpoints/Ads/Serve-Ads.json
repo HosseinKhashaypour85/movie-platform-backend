@@ -1,0 +1,44 @@
+﻿{
+  "name": "Serve Active Ads",
+  "category": "Ads",
+  "method": "GET",
+  "path": "/api/v1/ads",
+  "url": "http://localhost:8080/api/v1/ads?placement=preroll",
+  "description": "دریافت کمپین‌های تبلیغاتی فعال متناسب با موقعیت نمایش (مانند اول ویدیو preroll)",
+  "auth": {
+    "required": false,
+    "type": "none",
+    "description": "اندپوینت عمومی"
+  },
+  "headers": {},
+  "url_params": {},
+  "query_params": {
+    "placement": {
+      "type": "string",
+      "required": false,
+      "default": "preroll",
+      "description": "جایگاه تبلیغ (preroll, midroll, banner)"
+    }
+  },
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "click_url": "https://sponsor.test/deal",
+          "id": 1,
+          "media_url": "https://cdn.example.com/ads/promo.mp4",
+          "placement": "preroll",
+          "title": "Summer Promo"
+        }
+      ]
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/ads?placement=preroll\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/ads?placement=preroll\").then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Ads/Serve-Ads.bru"
+  }
+}

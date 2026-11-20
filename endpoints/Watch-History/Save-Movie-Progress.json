@@ -1,0 +1,49 @@
+﻿{
+  "name": "Save Movie Progress",
+  "category": "Watch-History",
+  "method": "PUT",
+  "path": "/api/v1/watch-history/{movieID}",
+  "url": "http://localhost:8080/api/v1/watch-history/1",
+  "description": "ثبت یا به‌روزرسانی ثانیه تماشا برای یک فیلم (Auto-save / Resume)",
+  "auth": {
+    "required": true,
+    "type": "bearer_user",
+    "description": "نیازمند توکن کاربر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {
+    "movieID": {
+      "type": "integer",
+      "required": true,
+      "example": 1,
+      "description": "شناسه فیلم"
+    }
+  },
+  "query_params": {},
+  "request_body": {
+    "position_seconds": 1620
+  },
+  "request_fields": {
+    "position_seconds": {
+      "type": "integer",
+      "required": true,
+      "description": "ثانیه جاری پخش فیلم"
+    }
+  },
+  "response_example": {
+    "status": 200,
+    "body": {
+      "message": "progress saved",
+      "movie_id": 1,
+      "position_seconds": 1620
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X PUT \"http://localhost:8080/api/v1/watch-history/1\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"position_seconds\":1620}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/watch-history/1\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ position_seconds: 1620 })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Watch-History/Save-Movie-Progress.bru"
+  }
+}

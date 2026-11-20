@@ -1,0 +1,63 @@
+﻿{
+  "name": "List All Users",
+  "category": "Admin-Users",
+  "method": "GET",
+  "path": "/api/v1/admin/users",
+  "url": "http://localhost:8080/api/v1/admin/users?limit=20&offset=0",
+  "description": "مشاهده لیست کامل کاربران به همراه فیلتر وضعیت حساب و جستجو",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>"
+  },
+  "url_params": {},
+  "query_params": {
+    "is_active": {
+      "type": "boolean",
+      "required": false,
+      "description": "فیلتر کاربران فعال/مسدود شده"
+    },
+    "limit": {
+      "type": "integer",
+      "required": false,
+      "default": 20,
+      "description": "تعداد در صفحه"
+    },
+    "offset": {
+      "type": "integer",
+      "required": false,
+      "default": 0,
+      "description": "آفست"
+    },
+    "q": {
+      "type": "string",
+      "required": false,
+      "description": "جستجو در نام یا ایمیل"
+    }
+  },
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "email": "hosein@example.com",
+          "id": 1,
+          "is_active": true,
+          "name": "Hosein Khashayarpour",
+          "role": "super_admin"
+        }
+      ],
+      "total": 1
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/admin/users?limit=20&offset=0\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/users?limit=20&offset=0\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Users/List-Users.bru"
+  }
+}

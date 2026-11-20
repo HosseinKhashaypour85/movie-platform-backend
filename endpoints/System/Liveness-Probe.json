@@ -1,0 +1,29 @@
+﻿{
+  "name": "Liveness Probe",
+  "category": "System",
+  "method": "GET",
+  "path": "/health/live",
+  "url": "http://localhost:8080/health/live",
+  "description": "بررسی زنده بودن پروسس سرور برای کوبرنتیز و داکر (Liveness Probe)",
+  "auth": {
+    "required": false,
+    "type": "none",
+    "description": "اندپوینت عمومی"
+  },
+  "headers": {},
+  "url_params": {},
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "status": "alive"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/health/live\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/health/live\").then(r => r.json()).then(console.log);",
+    "bruno": "bruno/System/Liveness-Probe.bru"
+  }
+}

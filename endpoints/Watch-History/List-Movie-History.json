@@ -1,0 +1,42 @@
+﻿{
+  "name": "List Movie Watch History",
+  "category": "Watch-History",
+  "method": "GET",
+  "path": "/api/v1/watch-history",
+  "url": "http://localhost:8080/api/v1/watch-history",
+  "description": "لیست فیلم‌های در حال تماشای کاربر به همراه ثانیه آخرین موقعیت پخش",
+  "auth": {
+    "required": true,
+    "type": "bearer_user",
+    "description": "نیازمند توکن کاربر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_JWT_TOKEN>"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": null,
+  "request_fields": {},
+  "response_example": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "movie": {
+            "duration_minutes": 148,
+            "id": 1,
+            "title": "Inception"
+          },
+          "movie_id": 1,
+          "position_seconds": 1540,
+          "updated_at": "2026-11-20T12:00:00Z"
+        }
+      ]
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X GET \"http://localhost:8080/api/v1/watch-history\" \\\n  -H \"Authorization: Bearer <YOUR_JWT_TOKEN>\"",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/watch-history\", {\n  headers: { \"Authorization\": \"Bearer \" + token }\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Watch-History/List-Movie-History.bru"
+  }
+}

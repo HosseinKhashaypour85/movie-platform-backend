@@ -1,0 +1,61 @@
+﻿{
+  "name": "Create Season",
+  "category": "Admin-Seasons",
+  "method": "POST",
+  "path": "/api/v1/admin/seasons",
+  "url": "http://localhost:8080/api/v1/admin/seasons",
+  "description": "افزودن یک فصل به یک سریال موجود",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {},
+  "query_params": {},
+  "request_body": {
+    "season_number": 2,
+    "series_id": 1,
+    "synopsis": "The story continues with higher stakes",
+    "title": "Season 2"
+  },
+  "request_fields": {
+    "season_number": {
+      "type": "integer",
+      "required": true,
+      "description": "شماره فصل"
+    },
+    "series_id": {
+      "type": "integer",
+      "required": true,
+      "description": "شناسه سریال والد"
+    },
+    "synopsis": {
+      "type": "string",
+      "required": false,
+      "description": "خلاصه فصل"
+    },
+    "title": {
+      "type": "string",
+      "required": false,
+      "description": "عنوان اختیاری فصل"
+    }
+  },
+  "response_example": {
+    "status": 201,
+    "body": {
+      "id": 2,
+      "season_number": 2,
+      "series_id": 1,
+      "title": "Season 2"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X POST \"http://localhost:8080/api/v1/admin/seasons\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"series_id\":1,\"season_number\":2,\"title\":\"Season 2\",\"synopsis\":\"The story continues\"}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/seasons\", {\n  method: \"POST\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ series_id: 1, season_number: 2, title: \"Season 2\" })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Seasons/Create-Season.bru"
+  }
+}

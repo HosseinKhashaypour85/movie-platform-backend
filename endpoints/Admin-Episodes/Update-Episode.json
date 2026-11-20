@@ -1,0 +1,72 @@
+﻿{
+  "name": "Update Episode",
+  "category": "Admin-Episodes",
+  "method": "PUT",
+  "path": "/api/v1/admin/episodes/{id}",
+  "url": "http://localhost:8080/api/v1/admin/episodes/2",
+  "description": "ویرایش اطلاعات یک اپیزود",
+  "auth": {
+    "required": true,
+    "type": "bearer_admin",
+    "description": "نیازمند توکن مدیر"
+  },
+  "headers": {
+    "Authorization": "Bearer <YOUR_ADMIN_JWT_TOKEN>",
+    "Content-Type": "application/json"
+  },
+  "url_params": {
+    "id": {
+      "type": "integer",
+      "required": true,
+      "example": 2,
+      "description": "شناسه اپیزود"
+    }
+  },
+  "query_params": {},
+  "request_body": {
+    "duration_minutes": 48,
+    "episode_number": 2,
+    "is_published": true,
+    "synopsis": "Updated episode synopsis",
+    "title": "Cat's in the Bag (Remastered)"
+  },
+  "request_fields": {
+    "duration_minutes": {
+      "type": "integer",
+      "required": true,
+      "description": "مدت زمان"
+    },
+    "episode_number": {
+      "type": "integer",
+      "required": true,
+      "description": "شماره قسمت"
+    },
+    "is_published": {
+      "type": "boolean",
+      "required": true,
+      "description": "وضعیت انتشار"
+    },
+    "synopsis": {
+      "type": "string",
+      "required": false,
+      "description": "خلاصه"
+    },
+    "title": {
+      "type": "string",
+      "required": true,
+      "description": "عنوان"
+    }
+  },
+  "response_example": {
+    "status": 200,
+    "body": {
+      "id": 2,
+      "title": "Cat's in the Bag (Remastered)"
+    }
+  },
+  "how_to_run": {
+    "curl": "curl -X PUT \"http://localhost:8080/api/v1/admin/episodes/2\" \\\n  -H \"Authorization: Bearer <YOUR_ADMIN_JWT_TOKEN>\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"episode_number\":2,\"title\":\"Cat'\\''s in the Bag (Remastered)\",\"duration_minutes\":48,\"is_published\":true}'",
+    "javascript_fetch": "fetch(\"http://localhost:8080/api/v1/admin/episodes/2\", {\n  method: \"PUT\",\n  headers: { \"Authorization\": \"Bearer \" + token, \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ episode_number: 2, title: \"Cat's in the Bag (Remastered)\", duration_minutes: 48, is_published: true })\n}).then(r => r.json()).then(console.log);",
+    "bruno": "bruno/Admin-Episodes/Update-Episode.bru"
+  }
+}
