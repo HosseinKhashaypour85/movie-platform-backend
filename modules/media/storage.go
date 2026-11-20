@@ -126,8 +126,8 @@ func (s *S3Presigner) presignRead(method, objectKey string, now time.Time, ttl t
 	if !validObjectKey(objectKey) || (method != "GET" && method != "HEAD") {
 		return "", errors.New("invalid object key or read method")
 	}
-	if ttl < time.Minute || ttl > 15*time.Minute {
-		return "", errors.New("presigned read expiry must be between 1 and 15 minutes")
+	if ttl < time.Minute || ttl > 60*time.Minute {
+		return "", errors.New("presigned read expiry must be between 1 and 60 minutes")
 	}
 	u := *s.endpoint
 	prefix := strings.TrimRight(u.Path, "/")
