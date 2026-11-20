@@ -61,4 +61,3 @@ func RegisterRoutes(r interface{ Get(string,http.HandlerFunc); Patch(string,http
 	r.Post("/profile/change-password",h.ChangePassword)
 }
 
-var _ = errors.Is
