@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"os/exec"
@@ -24,6 +25,7 @@ type Worker struct {
 	DB *gorm.DB
 	Storage *media.S3Presigner
 	FFmpegPath string
+	FFprobePath string
 	TempDir string
 	HTTP *http.Client
 	MaxSourceBytes int64
@@ -32,9 +34,11 @@ type Worker struct {
 func New(db *gorm.DB, storage *media.S3Presigner) (*Worker, error) {
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil { return nil, errors.New("ffmpeg executable was not found in PATH") }
+	ffprobe, err := exec.LookPath("ffprobe")
+	if err != nil { return nil, errors.New("ffprobe executable was not found in PATH") }
 	temp := os.Getenv("TRANSCODE_TEMP_DIR")
 	if temp == "" { temp = os.TempDir() }
-	return &Worker{DB:db, Storage:storage, FFmpegPath:ffmpeg, TempDir:temp, HTTP:&http.Client{Timeout:30*time.Minute}, MaxSourceBytes:2<<30}, nil
+	return &Worker{DB:db, Storage:storage, FFmpegPath:ffmpeg, FFprobePath:ffprobe, TempDir:temp, HTTP:&http.Client{Timeout:30*time.Minute}, MaxSourceBytes:2<<30}, nil
 }
 
 func (w *Worker) Run(ctx context.Context) error {
@@ -78,16 +82,18 @@ func (w *Worker) process(ctx context.Context, job *media.TranscodeJob) error {
 	if err:=w.download(ctx,downloadURL,input); err!=nil { return err }
 	outDir:=filepath.Join(work,"hls")
 	if err:=os.MkdirAll(outDir,0700); err!=nil { return err }
-	playlist:=filepath.Join(outDir,"index.m3u8")
-	segmentPattern:=filepath.Join(outDir,"segment_%05d.ts")
+	masterPlaylist:=filepath.Join(outDir,"master.m3u8")
 	ffCtx,cancel:=context.WithTimeout(ctx,6*time.Hour)
 	defer cancel()
-	cmd:=exec.CommandContext(ffCtx,w.FFmpegPath,
-		"-hide_banner","-nostdin","-y","-i",input,
-		"-map","0:v:0","-map","0:a:0?","-c:v","libx264","-preset","veryfast","-crf","23",
-		"-c:a","aac","-b:a","128k","-ac","2","-f","hls","-hls_time","6",
-		"-hls_playlist_type","vod","-hls_flags","independent_segments",
-		"-hls_segment_filename",segmentPattern,playlist)
+	width,height,hasAudio,err:=w.probe(ffCtx,input)
+	if err!=nil { return err }
+	renditions:=SelectRenditions(height)
+	if len(renditions)==0 { return errors.New("source video is too small for supported HLS renditions") }
+	if err:=createRenditionDirs(outDir,renditions); err!=nil { return err }
+	args,err:=BuildABRArguments(outDir,width,height,renditions,hasAudio)
+	if err!=nil { return err }
+	args=append([]string{"-hide_banner","-nostdin","-y","-i",input},args...)
+	cmd:=exec.CommandContext(ffCtx,w.FFmpegPath,args...)
 	logPath:=filepath.Join(work,"ffmpeg.log")
 	logFile,_:=os.Create(logPath)
 	if logFile!=nil { cmd.Stdout=logFile; cmd.Stderr=logFile; defer logFile.Close() }
@@ -96,11 +102,22 @@ func (w *Worker) process(ctx context.Context, job *media.TranscodeJob) error {
 		if logFile!=nil { _=logFile.Sync(); raw,_:=os.ReadFile(logPath); if len(raw)>2500 { raw=raw[len(raw)-2500:] }; return fmt.Errorf("ffmpeg failed: %s",strings.TrimSpace(string(raw))) }
 		return fmt.Errorf("ffmpeg failed: %w",err)
 	}
-	files,err:=filepath.Glob(filepath.Join(outDir,"*"))
-	if err!=nil || len(files)<2 { return errors.New("ffmpeg did not produce an HLS playlist and segments") }
+	files:=make([]string,0,32)
+	err=filepath.WalkDir(outDir,func(file string,entry fs.DirEntry,walkErr error) error {
+		if walkErr!=nil { return walkErr }
+		if !entry.IsDir() { files=append(files,file) }
+		return nil
+	})
+	if err!=nil { return err }
 	sort.Strings(files)
-	playlistBytes,err:=os.ReadFile(playlist)
-	if err!=nil || !strings.Contains(string(playlistBytes),"#EXTM3U") || !strings.Contains(string(playlistBytes),"#EXTINF:") { return errors.New("generated HLS playlist is invalid") }
+	if len(files)<3 { return errors.New("ffmpeg did not produce an ABR master playlist, variant playlists and segments") }
+	masterBytes,err:=os.ReadFile(masterPlaylist)
+	if err!=nil || !strings.Contains(string(masterBytes),"#EXT-X-STREAM-INF") { return errors.New("generated HLS master playlist is invalid") }
+	for _,rendition:=range renditions {
+		variant:=filepath.Join(outDir,rendition.Name,"index.m3u8")
+		data,readErr:=os.ReadFile(variant)
+		if readErr!=nil || !strings.Contains(string(data),"#EXTINF:") { return fmt.Errorf("generated %s variant playlist is invalid",rendition.Name) }
+	}
 	var random [12]byte
 	if _,err:=rand.Read(random[:]); err!=nil { return err }
 	prefix:=fmt.Sprintf("hls/%d/%s",source.ID,hex.EncodeToString(random[:]))
@@ -109,12 +126,14 @@ func (w *Worker) process(ctx context.Context, job *media.TranscodeJob) error {
 		info,statErr:=os.Stat(file)
 		if statErr!=nil { return statErr }
 		totalOutputBytes += uint64(info.Size())
-		name:=filepath.Base(file)
+		rel,relErr:=filepath.Rel(outDir,file)
+		if relErr!=nil { return relErr }
+		name:=filepath.ToSlash(rel)
 		contentType:="video/mp2t"
-		if name=="index.m3u8" { contentType="application/vnd.apple.mpegurl" }
+		if strings.HasSuffix(name,".m3u8") { contentType="application/vnd.apple.mpegurl" }
 		if err:=w.upload(ctx,prefix+"/"+name,file,contentType); err!=nil { return err }
 	}
-	outputKey:=prefix+"/index.m3u8"
+	outputKey:=prefix+"/master.m3u8"
 	output:=media.Asset{MovieID:source.MovieID,EpisodeID:source.EpisodeID,Kind:"video",StorageKey:outputKey,MimeType:"application/vnd.apple.mpegurl",SizeBytes:totalOutputBytes,IsActive:true}
 	return w.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err:=tx.Create(&output).Error; err!=nil { return err }
