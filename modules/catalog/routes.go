@@ -4,6 +4,7 @@ import "github.com/go-chi/chi/v5"
 
 func RegisterRoutes(r chi.Router, h *Handler) {
 	r.Route("/catalog", func(r chi.Router) {
+		r.Get("/genres", h.Genres)
 		r.Get("/movies", h.Movies)
 		r.Get("/movies/{id}", h.Movie)
 		r.Get("/series", h.Series)
