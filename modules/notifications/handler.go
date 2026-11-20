@@ -46,6 +46,8 @@ func (h *Handler) Broadcast(w http.ResponseWriter,r *http.Request) {
 	r.Body=http.MaxBytesReader(w,r.Body,4096)
 	d:=json.NewDecoder(r.Body); d.DisallowUnknownFields()
 	if d.Decode(&in)!=nil { httpx.Error(w,400,"invalid_body","invalid request body"); return }
+	var extra any
+	if err:=d.Decode(&extra); err!=io.EOF { httpx.Error(w,400,"invalid_body","request must contain one JSON object"); return }
 	in.Title=strings.TrimSpace(in.Title); in.Body=strings.TrimSpace(in.Body)
 	if in.Title=="" || len(in.Title)>160 || in.Body=="" || len(in.Body)>4000 || (in.ActionURL!="" && (!strings.HasPrefix(in.ActionURL,"https://") || len(in.ActionURL)>2048)) { httpx.Error(w,400,"validation_error","notification fields are invalid"); return }
 	if in.Type=="" { in.Type="general" }; if len(in.Type)>40 { httpx.Error(w,400,"validation_error","type is too long"); return }
