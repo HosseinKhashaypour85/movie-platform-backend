@@ -88,6 +88,16 @@ func (h *Handler) CompleteJob(w http.ResponseWriter,r *http.Request) {
 	httpx.JSON(w,201,map[string]any{"subtitle":sub,"status":"completed"})
 }
 
+func (h *Handler) PublishSubtitle(w http.ResponseWriter,r *http.Request) {
+	id,e:=strconv.ParseUint(chi.URLParam(r,"id"),10,64); if e!=nil || id==0 { httpx.Error(w,400,"invalid_id","invalid subtitle id"); return }
+	var body struct { IsPublished *bool `json:"is_published"` }
+	if !decodeMedia(w,r,&body) || body.IsPublished==nil { httpx.Error(w,400,"validation_error","is_published is required"); return }
+	res:=h.db.Model(&Subtitle{}).Where("id = ?",id).Update("is_published",*body.IsPublished)
+	if res.Error!=nil { httpx.Error(w,500,"internal_error","internal server error"); return }
+	if res.RowsAffected==0 { httpx.Error(w,404,"not_found","subtitle not found"); return }
+	httpx.JSON(w,200,map[string]bool{"is_published":*body.IsPublished})
+}
+
 func (h *Handler) authorizeWorker(w http.ResponseWriter,r *http.Request) bool {
 	if h.workerToken=="" { httpx.Error(w,503,"worker_disabled","subtitle worker is not configured"); return false }
 	if r.Header.Get("Authorization")!="Bearer "+h.workerToken { httpx.Error(w,401,"unauthorized","worker token required"); return false }
@@ -109,6 +119,7 @@ func RegisterAdminRoutes(r chi.Router,h *Handler) {
 		a.Use(middleware.RequireRole("admin","super_admin"))
 		a.Post("/assets",h.CreateAsset)
 		a.Post("/subtitle-jobs",h.CreateSubtitleJob)
+		a.Patch("/subtitles/{id}/publish",h.PublishSubtitle)
 	})
 }
 func RegisterWorkerRoutes(r chi.Router,h *Handler) {
