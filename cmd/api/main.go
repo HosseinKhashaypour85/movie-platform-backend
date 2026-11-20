@@ -56,6 +56,7 @@ func main() {
 			&media.Asset{},
 			&media.Subtitle{},
 			&media.SubtitleJob{},
+			&media.TranscodeJob{},
 			&notifications.Notification{},
 			&watch_history.WatchHistory{},
 			&watch_history.EpisodeWatchHistory{},

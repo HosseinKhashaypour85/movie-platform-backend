@@ -85,7 +85,14 @@ func (h *UploadHandler) CompleteUpload(w http.ResponseWriter, r *http.Request) {
 	}
 	asset := Asset{Kind:in.Kind, StorageKey:in.StorageKey, MimeType:meta.ContentType, SizeBytes:meta.SizeBytes, IsActive:false}
 	if in.TargetType == "movie" { asset.MovieID = &in.TargetID } else { asset.EpisodeID = &in.TargetID }
-	if err := h.db.WithContext(r.Context()).Create(&asset).Error; err != nil {
+	if err := h.db.WithContext(r.Context()).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&asset).Error; err != nil { return err }
+		if in.Kind == "video" {
+			job := TranscodeJob{SourceAssetID: asset.ID, Status: "queued"}
+			if err := tx.Create(&job).Error; err != nil { return err }
+		}
+		return nil
+	}); err != nil {
 		httpx.Error(w, 500, "internal_error", "asset could not be finalized")
 		return
 	}

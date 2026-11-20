@@ -111,3 +111,29 @@ Version 4 and binds the HTTP method, object path, expiry, host and content type.
 
 After the PUT succeeds, finalize the upload with `POST /api/v1/admin/media/uploads/complete` using the same `target_type`, `target_id`, `kind`, and returned `storage_key`. The API signs a HEAD request to the private bucket, checks the stored content type and size (2 GiB maximum for MP4, 20 MiB for images), and creates an inactive media asset. Repeated finalization is rejected. The asset remains inactive until a trusted processing worker has generated and verified HLS output; the current endpoint does not scan files or transcode source video. Do not expose uploaded objects publicly. Configure bucket CORS to allow PUT from the admin web origin and
 restrict IAM credentials to the intended bucket/prefix and required actions.
+
+## FFmpeg HLS transcoding worker
+
+A verified MP4 upload automatically creates a queued `transcode_jobs` row.
+Run the separate worker process on a host/container with FFmpeg installed and
+the same database and private S3-compatible storage credentials:
+
+```bash
+go run ./cmd/transcoder
+```
+
+The worker claims jobs using MySQL row locks, downloads the private source
+through a short-lived signed GET URL, packages HLS VOD (6-second MPEG-TS
+segments and an `index.m3u8` manifest) with FFmpeg/libx264/AAC, and uploads
+the generated playlist and segments to a unique private `hls/{asset-id}/...`
+prefix. Only after every upload succeeds does it create an active HLS asset
+and mark the job completed. Failed jobs retry up to three attempts. Temporary
+files are removed after processing; configure `TRANSCODE_TEMP_DIR` on a
+volume with sufficient free disk (at least the source size plus output space).
+
+Install FFmpeg with libx264 support in the worker image. The worker is a
+separate process from the API; do not run it in the public HTTP request path.
+The CDN edge must still enforce the signed playback URL for the master
+manifest, every variant/segment, and any keys. This worker currently creates
+a single-bitrate HLS rendition; adaptive bitrate ladders, thumbnail sprites,
+malware scanning, and source retention/cleanup are not included.
