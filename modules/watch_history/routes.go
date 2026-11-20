@@ -8,5 +8,10 @@ func RegisterRoutes(r chi.Router, h *Handler) {
 		r.Put("/{movieID}", h.Save)
 		r.Get("/{movieID}", h.Get)
 		r.Delete("/{movieID}", h.Delete)
+		r.Route("/episodes", func(er chi.Router) {
+			er.Get("/", h.EpisodeHistory)
+			er.Put("/{episodeID}", h.SaveEpisode)
+			er.Delete("/{episodeID}", h.DeleteEpisodeHistory)
+		})
 	})
 }

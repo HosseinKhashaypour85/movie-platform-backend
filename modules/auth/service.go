@@ -20,9 +20,9 @@ var (
 )
 
 type Service struct {
-	Users *users.Repository
+	Users    *users.Repository
 	Sessions *SessionRepository
-	Config config.Config
+	Config   config.Config
 }
 
 func NewService(u *users.Repository, sessions *SessionRepository, c config.Config) *Service {
@@ -81,22 +81,28 @@ func (s *Service) LoginWithSession(email, password, userAgent, ip string) (strin
 		return "", "", nil, e
 	}
 	refresh, err := s.Sessions.Create(u.ID, userAgent, ip)
-	if err != nil { return "", "", nil, err }
+	if err != nil {
+		return "", "", nil, err
+	}
 	return signed, refresh, u, nil
 }
 
 func (s *Service) Refresh(raw string) (string, string, error) {
 	userID, rotated, err := s.Sessions.Rotate(raw)
-	if err != nil { return "", "", ErrInvalidRefreshToken }
+	if err != nil {
+		return "", "", ErrInvalidRefreshToken
+	}
 	user, err := s.Users.FindByID(userID)
 	if err != nil || !user.IsActive {
 		_ = s.Sessions.Revoke(rotated, userID)
 		return "", "", ErrInvalidRefreshToken
 	}
 	now := time.Now()
-	claims := jwt.MapClaims{"user_id":user.ID, "role":user.Role, "iss":s.Config.JWTIssuer, "sub":fmt.Sprint(user.ID), "iat":now.Unix(), "exp":now.Add(s.Config.JWTTTL).Unix()}
+	claims := jwt.MapClaims{"user_id": user.ID, "role": user.Role, "iss": s.Config.JWTIssuer, "sub": fmt.Sprint(user.ID), "iat": now.Unix(), "exp": now.Add(s.Config.JWTTTL).Unix()}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	access, err := token.SignedString(s.Config.JWTSecret)
-	if err != nil { return "", "", err }
+	if err != nil {
+		return "", "", err
+	}
 	return access, rotated, nil
 }

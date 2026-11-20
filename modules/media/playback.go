@@ -23,10 +23,10 @@ import (
 // the signature and expiration on every protected request (including HLS segments).
 // An origin/CDN that ignores these parameters is not access controlled.
 type Playback struct {
-	db *gorm.DB
+	db   *gorm.DB
 	base *url.URL
-	key []byte
-	ttl time.Duration
+	key  []byte
+	ttl  time.Duration
 }
 
 func NewPlayback(db *gorm.DB) (*Playback, error) {
@@ -144,10 +144,10 @@ func (p *Playback) Manifest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.JSON(w, http.StatusOK, map[string]any{
-		"asset_id": asset.ID,
-		"format": "hls",
+		"asset_id":     asset.ID,
+		"format":       "hls",
 		"manifest_url": playURL,
-		"expires_at": expires,
+		"expires_at":   expires,
 	})
 }
 

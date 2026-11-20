@@ -1,0 +1,2726 @@
+openapi: 3.0.3
+info:
+  title: Movie Platform Backend API
+  version: 1.0.0
+  description: |
+    Comprehensive API documentation for the Movie and Series Streaming Platform Backend.
+    Built with Go, Chi router, GORM, MySQL, and S3-compatible Object Storage.
+    
+    This document is fully compatible with **Bruno** (Import Collection -> OpenAPI V3 Spec),
+    Swagger UI, Postman, and other OpenAPI tools.
+servers:
+  - url: http://localhost:8080
+    description: Local Development Server
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: System & Health
+    description: Health checks and root diagnostics
+  - name: Auth & Sessions
+    description: Authentication, registration, JWT tokens, session lifecycle and logout
+  - name: User Profile
+    description: Current user profile management and password change
+  - name: Catalog (Public)
+    description: Public movies, series, seasons, and episodes discovery
+  - name: Media & Playback
+    description: Signed HLS playback URLs and public subtitles
+  - name: Ads (Public)
+    description: Active advertising campaigns serving and event tracking
+  - name: Engagement
+    description: Ratings and user favorite movies
+  - name: Watch History
+    description: Video watch progress tracking for movies and series episodes
+  - name: Notifications (User)
+    description: In-app user notifications and read receipt management
+  - name: Admin Dashboard & Analytics
+    description: System metrics, overview statistics, and analytics
+  - name: Admin Audit Logs
+    description: Security audit trails for administrative mutation operations
+  - name: Admin Users
+    description: User management, role assignment, and account activation
+  - name: Admin Genres
+    description: Genre management for categorization
+  - name: Admin Movies
+    description: Movie catalog management CRUD
+  - name: Admin Series & Episodes
+    description: TV series, seasons, and episodes management CRUD
+  - name: Admin Media & Uploads
+    description: Presigned S3 uploads, upload verification, and subtitle AI jobs
+  - name: Admin Ads
+    description: Administrative management of ad campaigns
+  - name: Admin Notifications
+    description: Broadcast notification delivery to all users
+  - name: Internal Worker
+    description: Subtitle processing worker claim and completion endpoints
+
+paths:
+  /:
+    get:
+      tags:
+        - System & Health
+      summary: Root Service Status
+      security: []
+      responses:
+        '200':
+          description: Service running confirmation
+          content:
+            application/json:
+              example:
+                service: movie-platform-api
+                status: running
+
+  /health/live:
+    get:
+      tags:
+        - System & Health
+      summary: Liveness Probe
+      security: []
+      responses:
+        '200':
+          description: API process is alive
+          content:
+            application/json:
+              example:
+                status: alive
+
+  /health/ready:
+    get:
+      tags:
+        - System & Health
+      summary: Readiness Probe
+      description: Verifies active database connection pool responsiveness.
+      security: []
+      responses:
+        '200':
+          description: Database and dependencies ready
+          content:
+            application/json:
+              example:
+                status: ready
+        '503':
+          description: Dependencies unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/register:
+    post:
+      tags:
+        - Auth & Sessions
+      summary: Register New User
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  minLength: 2
+                  maxLength: 100
+                  example: Hosein Khashayarpour
+                email:
+                  type: string
+                  format: email
+                  maxLength: 254
+                  example: hosein@example.com
+                password:
+                  type: string
+                  minLength: 12
+                  maxLength: 72
+                  example: SuperSecurePass123!
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Auth & Sessions
+      summary: User Login
+      description: Returns a short-lived JWT access token and a rotating refresh token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: hosein@example.com
+                password:
+                  type: string
+                  example: SuperSecurePass123!
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+                  expires_in:
+                    type: integer
+                    example: 900
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Missing or invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/refresh:
+    post:
+      tags:
+        - Auth & Sessions
+      summary: Refresh Access Token
+      description: Exchanges a valid refresh token for a new access token and rotated refresh token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refresh_token
+              properties:
+                refresh_token:
+                  type: string
+                  example: 3b1a8d0e5c9f...
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+                  expires_in:
+                    type: integer
+                    example: 900
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/logout:
+    post:
+      tags:
+        - Auth & Sessions
+      summary: Logout Current Session
+      description: Revokes the specified refresh token session.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refresh_token
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        '204':
+          description: Session revoked successfully
+        '401':
+          description: Unauthorized
+
+  /api/v1/auth/logout-all:
+    post:
+      tags:
+        - Auth & Sessions
+      summary: Logout All Sessions
+      description: Revokes all active refresh token sessions for the authenticated user.
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: All sessions revoked successfully
+        '401':
+          description: Unauthorized
+
+  /api/v1/profile:
+    get:
+      tags:
+        - User Profile
+      summary: Get Current User Profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Authenticated user details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+    patch:
+      tags:
+        - User Profile
+      summary: Update Profile Name
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 2
+                  maxLength: 100
+                  example: Hosein Khashayarpour
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+        '400':
+          description: Validation error
+
+  /api/v1/profile/change-password:
+    post:
+      tags:
+        - User Profile
+      summary: Change Password
+      description: Validates current password and updates to new password, revoking all other active sessions.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - current_password
+                - new_password
+              properties:
+                current_password:
+                  type: string
+                  example: OldPassword123!
+                new_password:
+                  type: string
+                  minLength: 12
+                  maxLength: 72
+                  example: NewSecurePassword2026!
+      responses:
+        '204':
+          description: Password changed successfully
+        '400':
+          description: Incorrect current password or invalid new password
+
+  /api/v1/catalog/movies:
+    get:
+      tags:
+        - Catalog (Public)
+      summary: List Published Movies
+      security: []
+      parameters:
+        - name: q
+          in: query
+          description: Search term matching title or original title
+          schema:
+            type: string
+        - name: genre_id
+          in: query
+          description: Filter by genre ID
+          schema:
+            type: integer
+        - name: year
+          in: query
+          description: Filter by release year
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Page size (1 to 100, default 20)
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          description: Number of records to skip
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of published movies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Movie'
+                  total:
+                    type: integer
+                    example: 45
+
+  /api/v1/catalog/movies/{id}:
+    get:
+      tags:
+        - Catalog (Public)
+      summary: Get Movie By ID
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Movie details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Movie'
+        '400':
+          description: Invalid ID
+        '404':
+          description: Movie not found
+
+  /api/v1/catalog/series:
+    get:
+      tags:
+        - Catalog (Public)
+      summary: List Published Series
+      security: []
+      parameters:
+        - name: q
+          in: query
+          description: Search term matching title or original title
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of series
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Series'
+                  total:
+                    type: integer
+
+  /api/v1/catalog/series/{id}:
+    get:
+      tags:
+        - Catalog (Public)
+      summary: Get Series By ID
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Series details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Series'
+        '404':
+          description: Series not found
+
+  /api/v1/catalog/series/{id}/seasons:
+    get:
+      tags:
+        - Catalog (Public)
+      summary: List Seasons of a Series
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Series ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Seasons list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Season'
+
+  /api/v1/catalog/seasons/{id}/episodes:
+    get:
+      tags:
+        - Catalog (Public)
+      summary: List Episodes of a Season
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Season ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Episodes list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Episode'
+
+  /api/v1/media/{kind}/{id}/subtitles:
+    get:
+      tags:
+        - Media & Playback
+      summary: List Subtitles for Content
+      security: []
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [movies, episodes]
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Available subtitles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Subtitle'
+
+  /api/v1/playback/{kind}/{id}:
+    get:
+      tags:
+        - Media & Playback
+      summary: Get Signed HLS Playback Manifest
+      description: Generates a short-lived HMAC-signed HLS manifest URL for protected media streaming.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [movies, episodes]
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Signed playback URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  asset_id:
+                    type: integer
+                  format:
+                    type: string
+                    example: hls
+                  manifest_url:
+                    type: string
+                    example: https://cdn.example.com/movies/1/video/master.m3u8?expires=1700000300&signature=...
+                  expires_at:
+                    type: string
+                    format: date-time
+        '404':
+          description: Playable content not found
+
+  /api/v1/ads:
+    get:
+      tags:
+        - Ads (Public)
+      summary: Serve Active Ads by Placement
+      security: []
+      parameters:
+        - name: placement
+          in: query
+          required: true
+          description: Ad slot placement (e.g., player_pre_roll, home_banner, sidebar)
+          schema:
+            type: string
+            example: player_pre_roll
+      responses:
+        '200':
+          description: Active ad campaigns for this placement
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Campaign'
+
+  /api/v1/ads/{id}/events:
+    post:
+      tags:
+        - Ads (Public)
+      summary: Track Ad Event (Impression or Click)
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Campaign ID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+              properties:
+                type:
+                  type: string
+                  enum: [impression, click]
+                placement:
+                  type: string
+                  example: player_pre_roll
+      responses:
+        '204':
+          description: Event tracked
+
+  /api/v1/movies/{movieID}/ratings/summary:
+    get:
+      tags:
+        - Engagement
+      summary: Get Movie Rating Summary
+      security: []
+      parameters:
+        - name: movieID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Average rating and review count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  average:
+                    type: number
+                    format: float
+                    example: 8.4
+                  count:
+                    type: integer
+                    example: 1250
+
+  /api/v1/movies/{movieID}/ratings:
+    post:
+      tags:
+        - Engagement
+      summary: Rate a Movie
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: movieID
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - score
+              properties:
+                score:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                  example: 9
+      responses:
+        '200':
+          description: Rating saved
+          content:
+            application/json:
+              example:
+                status: rated
+
+  /api/v1/favorites:
+    get:
+      tags:
+        - Engagement
+      summary: List User Favorite Movies
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: User favorite items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Favorite'
+
+  /api/v1/favorites/{movieID}:
+    put:
+      tags:
+        - Engagement
+      summary: Add Movie to Favorites
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: movieID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Movie added to favorites
+          content:
+            application/json:
+              example:
+                status: added
+    delete:
+      tags:
+        - Engagement
+      summary: Remove Movie from Favorites
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: movieID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Movie removed from favorites
+
+  /api/v1/watch-history:
+    get:
+      tags:
+        - Watch History
+      summary: List Movie Watch History
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Watch history list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WatchHistory'
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+
+  /api/v1/watch-history/{movieID}:
+    get:
+      tags:
+        - Watch History
+      summary: Get Watch Progress for Movie
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: movieID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Watch progress record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchHistory'
+        '404':
+          description: History record not found
+    put:
+      tags:
+        - Watch History
+      summary: Update Movie Watch Progress
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: movieID
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - progress_seconds
+                - duration_seconds
+              properties:
+                progress_seconds:
+                  type: integer
+                  example: 1800
+                duration_seconds:
+                  type: integer
+                  example: 7200
+      responses:
+        '200':
+          description: Progress saved
+          content:
+            application/json:
+              example:
+                status: saved
+    delete:
+      tags:
+        - Watch History
+      summary: Delete Movie Watch Progress
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: movieID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: History deleted
+
+  /api/v1/watch-history/episodes:
+    get:
+      tags:
+        - Watch History
+      summary: List Episode Watch History
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Episode watch history list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EpisodeWatchHistory'
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+
+  /api/v1/watch-history/episodes/{episodeID}:
+    put:
+      tags:
+        - Watch History
+      summary: Update Episode Watch Progress
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: episodeID
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - progress_seconds
+                - duration_seconds
+              properties:
+                progress_seconds:
+                  type: integer
+                  example: 1200
+                duration_seconds:
+                  type: integer
+                  example: 2700
+      responses:
+        '200':
+          description: Progress saved
+          content:
+            application/json:
+              example:
+                status: saved
+    delete:
+      tags:
+        - Watch History
+      summary: Delete Episode Watch Progress
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: episodeID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: History deleted
+
+  /api/v1/notifications:
+    get:
+      tags:
+        - Notifications (User)
+      summary: List Notifications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Notifications list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Notification'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+
+  /api/v1/notifications/{id}/read:
+    patch:
+      tags:
+        - Notifications (User)
+      summary: Mark Notification As Read
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Marked as read
+
+  /api/v1/notifications/read-all:
+    post:
+      tags:
+        - Notifications (User)
+      summary: Mark All Notifications As Read
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: All marked as read
+
+  /api/v1/admin/dashboard:
+    get:
+      tags:
+        - Admin Dashboard & Analytics
+      summary: Admin Dashboard Counts
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Entity totals
+          content:
+            application/json:
+              example:
+                users: 1540
+                movies: 320
+                series: 85
+                episodes: 1250
+
+  /api/v1/admin/analytics:
+    get:
+      tags:
+        - Admin Dashboard & Analytics
+      summary: System Analytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: days
+          in: query
+          description: Analytics timeframe (7, 30 or 90)
+          schema:
+            type: integer
+            enum: [7, 30, 90]
+            default: 30
+      responses:
+        '200':
+          description: Aggregated analytics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  range_days:
+                    type: integer
+                  generated_at:
+                    type: string
+                    format: date-time
+                  summary:
+                    type: object
+                  daily:
+                    type: array
+                    items:
+                      type: object
+                  top_movies:
+                    type: array
+                    items:
+                      type: object
+
+  /api/v1/admin/audit-logs:
+    get:
+      tags:
+        - Admin Audit Logs
+      summary: Query Audit Logs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: actor_user_id
+          in: query
+          schema:
+            type: integer
+        - name: action
+          in: query
+          schema:
+            type: string
+            enum: [POST, PUT, PATCH, DELETE]
+        - name: resource_type
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        '200':
+          description: Audit log trail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditLog'
+                  pagination:
+                    type: object
+
+  /api/v1/admin/users:
+    get:
+      tags:
+        - Admin Users
+      summary: List Users (Admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          description: Search by name or email
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, disabled]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Users list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+
+  /api/v1/admin/users/{id}/status:
+    patch:
+      tags:
+        - Admin Users
+      summary: Set User Active Status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - is_active
+              properties:
+                is_active:
+                  type: boolean
+                  example: false
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              example:
+                is_active: false
+
+  /api/v1/admin/users/{id}/role:
+    patch:
+      tags:
+        - Admin Users
+      summary: Set User Role (Super Admin Only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - role
+              properties:
+                role:
+                  type: string
+                  enum: [user, admin, super_admin]
+      responses:
+        '200':
+          description: Role updated
+          content:
+            application/json:
+              example:
+                role: admin
+        '403':
+          description: Requires super_admin role
+
+  /api/v1/admin/genres:
+    post:
+      tags:
+        - Admin Genres
+      summary: Create Genre
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - slug
+              properties:
+                name:
+                  type: string
+                  maxLength: 80
+                  example: Sci-Fi
+                slug:
+                  type: string
+                  maxLength: 100
+                  example: sci-fi
+      responses:
+        '201':
+          description: Genre created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Genre'
+
+  /api/v1/admin/genres/{id}:
+    put:
+      tags:
+        - Admin Genres
+      summary: Update Genre
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - slug
+              properties:
+                name:
+                  type: string
+                  example: Science Fiction
+                slug:
+                  type: string
+                  example: science-fiction
+      responses:
+        '200':
+          description: Genre updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Genre'
+    delete:
+      tags:
+        - Admin Genres
+      summary: Delete Genre
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Genre deleted
+        '409':
+          description: Genre is assigned to movies or series
+
+  /api/v1/admin/movies:
+    post:
+      tags:
+        - Admin Movies
+      summary: Create Movie
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovieInput'
+      responses:
+        '201':
+          description: Movie created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Movie'
+
+  /api/v1/admin/movies/{id}:
+    put:
+      tags:
+        - Admin Movies
+      summary: Update Movie
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovieInput'
+      responses:
+        '200':
+          description: Movie updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Movie'
+    delete:
+      tags:
+        - Admin Movies
+      summary: Delete Movie (Soft Delete)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Movie soft deleted
+
+  /api/v1/admin/series:
+    post:
+      tags:
+        - Admin Series & Episodes
+      summary: Create Series
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SeriesInput'
+      responses:
+        '201':
+          description: Series created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Series'
+
+  /api/v1/admin/series/{id}:
+    put:
+      tags:
+        - Admin Series & Episodes
+      summary: Update Series
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SeriesInput'
+      responses:
+        '200':
+          description: Series updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Series'
+    delete:
+      tags:
+        - Admin Series & Episodes
+      summary: Delete Series
+      description: Soft deletes the series. Fails if active seasons exist under it.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Series deleted
+        '409':
+          description: Series has seasons
+
+  /api/v1/admin/seasons:
+    post:
+      tags:
+        - Admin Series & Episodes
+      summary: Create Season
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - series_id
+                - number
+              properties:
+                series_id:
+                  type: integer
+                  example: 1
+                number:
+                  type: integer
+                  example: 1
+                title:
+                  type: string
+                  example: Season 1
+      responses:
+        '201':
+          description: Season created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Season'
+
+  /api/v1/admin/seasons/{id}:
+    put:
+      tags:
+        - Admin Series & Episodes
+      summary: Update Season
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - series_id
+                - number
+              properties:
+                series_id:
+                  type: integer
+                number:
+                  type: integer
+                title:
+                  type: string
+      responses:
+        '200':
+          description: Season updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Season'
+    delete:
+      tags:
+        - Admin Series & Episodes
+      summary: Delete Season
+      description: Fails if episodes exist in the season.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Season deleted
+        '409':
+          description: Season has episodes
+
+  /api/v1/admin/episodes:
+    post:
+      tags:
+        - Admin Series & Episodes
+      summary: Create Episode
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EpisodeInput'
+      responses:
+        '201':
+          description: Episode created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Episode'
+
+  /api/v1/admin/episodes/{id}:
+    put:
+      tags:
+        - Admin Series & Episodes
+      summary: Update Episode
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EpisodeInput'
+      responses:
+        '200':
+          description: Episode updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Episode'
+    delete:
+      tags:
+        - Admin Series & Episodes
+      summary: Delete Episode
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Episode deleted
+
+  /api/v1/admin/media/assets:
+    post:
+      tags:
+        - Admin Media & Uploads
+      summary: Manually Register Media Asset
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - kind
+                - storage_key
+              properties:
+                movie_id:
+                  type: integer
+                  nullable: true
+                episode_id:
+                  type: integer
+                  nullable: true
+                kind:
+                  type: string
+                  enum: [video, trailer, poster]
+                storage_key:
+                  type: string
+                playback_url:
+                  type: string
+                mime_type:
+                  type: string
+                  example: video/mp4
+      responses:
+        '201':
+          description: Asset registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+
+  /api/v1/admin/media/uploads:
+    post:
+      tags:
+        - Admin Media & Uploads
+      summary: Initiate Presigned S3 Upload
+      description: Issues a single-use presigned S3 PUT URL for direct client-to-storage upload.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - target_type
+                - target_id
+                - kind
+                - content_type
+              properties:
+                target_type:
+                  type: string
+                  enum: [movie, episode]
+                target_id:
+                  type: integer
+                kind:
+                  type: string
+                  enum: [video, trailer, poster]
+                content_type:
+                  type: string
+                  enum: [video/mp4, image/jpeg, image/png, image/webp]
+      responses:
+        '201':
+          description: Presigned upload URL generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  method:
+                    type: string
+                    example: PUT
+                  upload_url:
+                    type: string
+                  headers:
+                    type: object
+                  storage_key:
+                    type: string
+                  expires_in_seconds:
+                    type: integer
+                    example: 600
+
+  /api/v1/admin/media/uploads/complete:
+    post:
+      tags:
+        - Admin Media & Uploads
+      summary: Finalize S3 Upload
+      description: Verifies S3 HEAD object size and MIME type, then creates an inactive Asset record pending HLS transcoding.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - target_type
+                - target_id
+                - kind
+                - storage_key
+              properties:
+                target_type:
+                  type: string
+                  enum: [movie, episode]
+                target_id:
+                  type: integer
+                kind:
+                  type: string
+                  enum: [video, trailer, poster]
+                storage_key:
+                  type: string
+      responses:
+        '201':
+          description: Upload verified and asset created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  asset:
+                    $ref: '#/components/schemas/Asset'
+                  status:
+                    type: string
+                    example: uploaded_pending_processing
+                  message:
+                    type: string
+
+  /api/v1/admin/media/subtitle-jobs:
+    post:
+      tags:
+        - Admin Media & Uploads
+      summary: Queue Subtitle AI Transcoding Job
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - source_asset_id
+                - source_language
+                - target_language
+              properties:
+                source_asset_id:
+                  type: integer
+                  example: 12
+                source_language:
+                  type: string
+                  example: en
+                target_language:
+                  type: string
+                  example: fa
+      responses:
+        '202':
+          description: Subtitle job queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubtitleJob'
+
+  /api/v1/admin/media/subtitles/{id}/publish:
+    patch:
+      tags:
+        - Admin Media & Uploads
+      summary: Publish or Unpublish Subtitle
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - is_published
+              properties:
+                is_published:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: Subtitle status updated
+          content:
+            application/json:
+              example:
+                is_published: true
+
+  /api/v1/admin/ads:
+    get:
+      tags:
+        - Admin Ads
+      summary: List All Campaigns (Admin)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of all campaigns
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Campaign'
+    post:
+      tags:
+        - Admin Ads
+      summary: Create Ad Campaign
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignInput'
+      responses:
+        '201':
+          description: Campaign created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+
+  /api/v1/admin/ads/{id}:
+    put:
+      tags:
+        - Admin Ads
+      summary: Update Ad Campaign
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignInput'
+      responses:
+        '200':
+          description: Campaign updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+
+  /api/v1/notifications/broadcast:
+    post:
+      tags:
+        - Admin Notifications
+      summary: Broadcast In-App Notification to All Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - body
+              properties:
+                title:
+                  type: string
+                  maxLength: 160
+                  example: New Season of The Last of Us Released!
+                body:
+                  type: string
+                  maxLength: 4000
+                  example: Watch all episodes of the new season in 4K HDR now.
+                type:
+                  type: string
+                  example: release
+                action_url:
+                  type: string
+                  example: https://movieplatform.com/series/the-last-of-us
+      responses:
+        '202':
+          description: Broadcast queued
+          content:
+            application/json:
+              example:
+                status: queued
+
+  /internal/v1/worker/subtitle-jobs/claim:
+    post:
+      tags:
+        - Internal Worker
+      summary: Claim Next Subtitle Job (Worker Only)
+      security:
+        - workerAuth: []
+      responses:
+        '200':
+          description: Job claimed or null if queue is empty
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job:
+                    nullable: true
+                    allOf:
+                      - $ref: '#/components/schemas/SubtitleJob'
+
+  /internal/v1/worker/subtitle-jobs/{id}/complete:
+    post:
+      tags:
+        - Internal Worker
+      summary: Complete or Fail Subtitle Job (Worker Only)
+      security:
+        - workerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                storage_key:
+                  type: string
+                download_url:
+                  type: string
+                label:
+                  type: string
+                  example: Persian (Farsi)
+                format:
+                  type: string
+                  enum: [vtt, srt]
+                error:
+                  type: string
+      responses:
+        '200':
+          description: Failed status reported
+        '201':
+          description: Subtitle saved and job marked completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subtitle:
+                    $ref: '#/components/schemas/Subtitle'
+                  status:
+                    type: string
+                    example: completed
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Standard user and admin JWT access token.
+        Pass in header: `Authorization: Bearer <access_token>`
+    workerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Internal worker token configured via `SUBTITLE_WORKER_TOKEN`.
+        Pass in header: `Authorization: Bearer <worker_token>`
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: invalid_input
+            message:
+              type: string
+              example: name, email or password is invalid
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Hosein Khashayarpour
+        email:
+          type: string
+          format: email
+          example: hosein@example.com
+        role:
+          type: string
+          enum: [user, admin, super_admin]
+          example: user
+        is_active:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Genre:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Sci-Fi
+        slug:
+          type: string
+          example: sci-fi
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Movie:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Inception
+        original_title:
+          type: string
+          example: Inception
+        slug:
+          type: string
+          example: inception-2010
+        synopsis:
+          type: string
+          example: A thief who steals corporate secrets through the use of dream-sharing technology...
+        release_year:
+          type: integer
+          example: 2010
+        duration_minutes:
+          type: integer
+          example: 148
+        age_rating:
+          type: string
+          example: PG-13
+        poster_url:
+          type: string
+          example: https://example.com/posters/inception.jpg
+        backdrop_url:
+          type: string
+          example: https://example.com/backdrops/inception.jpg
+        language:
+          type: string
+          example: English
+        country:
+          type: string
+          example: United States
+        imdb_rating:
+          type: number
+          format: float
+          example: 8.8
+        is_published:
+          type: boolean
+          example: true
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        genres:
+          type: array
+          items:
+            $ref: '#/components/schemas/Genre'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    MovieInput:
+      type: object
+      required:
+        - title
+        - slug
+      properties:
+        title:
+          type: string
+          maxLength: 240
+          example: Inception
+        original_title:
+          type: string
+          maxLength: 240
+          example: Inception
+        slug:
+          type: string
+          maxLength: 260
+          example: inception-2010
+        synopsis:
+          type: string
+          example: A mind-bending thriller by Christopher Nolan.
+        release_year:
+          type: integer
+          example: 2010
+        duration_minutes:
+          type: integer
+          example: 148
+        age_rating:
+          type: string
+          example: PG-13
+        poster_url:
+          type: string
+          example: https://example.com/posters/inception.jpg
+        backdrop_url:
+          type: string
+          example: https://example.com/backdrops/inception.jpg
+        language:
+          type: string
+          example: English
+        country:
+          type: string
+          example: United States
+        imdb_rating:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 10
+          example: 8.8
+        is_published:
+          type: boolean
+          example: true
+
+    Series:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Breaking Bad
+        original_title:
+          type: string
+          example: Breaking Bad
+        slug:
+          type: string
+          example: breaking-bad
+        synopsis:
+          type: string
+          example: A chemistry teacher diagnosed with cancer turns to cooking meth...
+        release_year:
+          type: integer
+          example: 2008
+        end_year:
+          type: integer
+          example: 2013
+        age_rating:
+          type: string
+          example: TV-MA
+        poster_url:
+          type: string
+        backdrop_url:
+          type: string
+        language:
+          type: string
+        country:
+          type: string
+        imdb_rating:
+          type: number
+          format: float
+          example: 9.5
+        is_published:
+          type: boolean
+        genres:
+          type: array
+          items:
+            $ref: '#/components/schemas/Genre'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    SeriesInput:
+      type: object
+      required:
+        - title
+        - slug
+      properties:
+        title:
+          type: string
+          maxLength: 240
+          example: Breaking Bad
+        original_title:
+          type: string
+          maxLength: 240
+        slug:
+          type: string
+          maxLength: 260
+          example: breaking-bad
+        synopsis:
+          type: string
+        release_year:
+          type: integer
+          example: 2008
+        end_year:
+          type: integer
+          example: 2013
+        age_rating:
+          type: string
+          example: TV-MA
+        poster_url:
+          type: string
+        backdrop_url:
+          type: string
+        language:
+          type: string
+        country:
+          type: string
+        imdb_rating:
+          type: number
+          format: float
+          example: 9.5
+        is_published:
+          type: boolean
+          example: true
+
+    Season:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        series_id:
+          type: integer
+          example: 1
+        number:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Season 1
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Episode:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        season_id:
+          type: integer
+          example: 1
+        number:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Pilot
+        synopsis:
+          type: string
+          example: Walter White learns of his diagnosis...
+        duration_minutes:
+          type: integer
+          example: 58
+        thumbnail_url:
+          type: string
+        is_published:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    EpisodeInput:
+      type: object
+      required:
+        - season_id
+        - number
+        - title
+      properties:
+        season_id:
+          type: integer
+          example: 1
+        number:
+          type: integer
+          example: 1
+        title:
+          type: string
+          maxLength: 240
+          example: Pilot
+        synopsis:
+          type: string
+        duration_minutes:
+          type: integer
+          example: 58
+        thumbnail_url:
+          type: string
+        is_published:
+          type: boolean
+          example: true
+
+    Asset:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        movie_id:
+          type: integer
+          nullable: true
+        episode_id:
+          type: integer
+          nullable: true
+        kind:
+          type: string
+          enum: [video, trailer, poster]
+        storage_key:
+          type: string
+          example: movies/1/video/2026/11/abc123.mp4
+        playback_url:
+          type: string
+        mime_type:
+          type: string
+          example: video/mp4
+        size_bytes:
+          type: integer
+          example: 1542000000
+        is_active:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Subtitle:
+      type: object
+      properties:
+        id:
+          type: integer
+        movie_id:
+          type: integer
+          nullable: true
+        episode_id:
+          type: integer
+          nullable: true
+        language:
+          type: string
+          example: fa
+        label:
+          type: string
+          example: Persian
+        format:
+          type: string
+          example: vtt
+        download_url:
+          type: string
+          example: https://cdn.example.com/subtitles/fa.vtt
+        is_generated:
+          type: boolean
+          example: true
+        is_published:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+
+    SubtitleJob:
+      type: object
+      properties:
+        id:
+          type: integer
+        movie_id:
+          type: integer
+          nullable: true
+        episode_id:
+          type: integer
+          nullable: true
+        source_asset_id:
+          type: integer
+        source_language:
+          type: string
+          example: en
+        target_language:
+          type: string
+          example: fa
+        status:
+          type: string
+          enum: [queued, processing, completed, failed]
+          example: queued
+        error_message:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Black Friday 2026 Promo
+        placement:
+          type: string
+          example: player_pre_roll
+        format:
+          type: string
+          enum: [image, video, banner]
+          example: video
+        media_url:
+          type: string
+          example: https://cdn.example.com/ads/promo.mp4
+        click_url:
+          type: string
+          example: https://brand.com/deals
+        advertiser:
+          type: string
+          example: Brand Co
+        is_active:
+          type: boolean
+          example: true
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        impression_count:
+          type: integer
+          example: 4520
+        click_count:
+          type: integer
+          example: 310
+
+    CampaignInput:
+      type: object
+      required:
+        - name
+        - placement
+        - format
+        - media_url
+        - starts_at
+        - ends_at
+      properties:
+        name:
+          type: string
+          maxLength: 160
+          example: Black Friday 2026 Promo
+        placement:
+          type: string
+          maxLength: 40
+          example: player_pre_roll
+        format:
+          type: string
+          enum: [image, video, banner]
+          example: video
+        media_url:
+          type: string
+          example: https://cdn.example.com/ads/promo.mp4
+        click_url:
+          type: string
+          example: https://brand.com/deals
+        advertiser:
+          type: string
+          example: Brand Co
+        is_active:
+          type: boolean
+          example: true
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+
+    Favorite:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 42
+        movie_id:
+          type: integer
+          example: 5
+        created_at:
+          type: string
+          format: date-time
+
+    WatchHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        movie_id:
+          type: integer
+        progress_seconds:
+          type: integer
+          example: 1800
+        duration_seconds:
+          type: integer
+          example: 7200
+        completed:
+          type: boolean
+          example: false
+        watched_at:
+          type: string
+          format: date-time
+
+    EpisodeWatchHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        episode_id:
+          type: integer
+        progress_seconds:
+          type: integer
+          example: 1200
+        duration_seconds:
+          type: integer
+          example: 2700
+        completed:
+          type: boolean
+          example: false
+        watched_at:
+          type: string
+          format: date-time
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        title:
+          type: string
+          example: System Update
+        body:
+          type: string
+          example: Welcome to the new Movie Platform!
+        type:
+          type: string
+          example: general
+        action_url:
+          type: string
+          example: https://movieplatform.com
+        read_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        actor_user_id:
+          type: integer
+        action:
+          type: string
+          example: POST
+        resource_type:
+          type: string
+          example: movies
+        resource_id:
+          type: string
+          example: 12
+        path:
+          type: string
+          example: /api/v1/admin/movies
+        status_code:
+          type: integer
+          example: 201
+        ip_address:
+          type: string
+        user_agent:
+          type: string
+        request_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time

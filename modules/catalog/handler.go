@@ -110,6 +110,9 @@ func (h *Handler) Episodes(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) Genres(w http.ResponseWriter, r *http.Request) {
 	rows, err := h.Service.Genres()
-	if err != nil { httpx.Error(w,500,"internal_error","internal server error"); return }
-	httpx.JSON(w,200,map[string]any{"items":rows})
+	if err != nil {
+		httpx.Error(w, 500, "internal_error", "internal server error")
+		return
+	}
+	httpx.JSON(w, 200, map[string]any{"items": rows})
 }

@@ -9,9 +9,15 @@ import (
 
 // PresignGet creates a short-lived read URL for a private object.
 func (s *S3Presigner) PresignGet(objectKey string, now time.Time, ttl time.Duration) (string, error) {
-	if s == nil || s.endpoint == nil { return "", errors.New("S3 storage is not configured") }
-	if !validObjectKey(objectKey) { return "", errors.New("invalid object key") }
-	if ttl < time.Minute || ttl > 60*time.Minute { return "", errors.New("presigned download expiry must be between 1 and 60 minutes") }
+	if s == nil || s.endpoint == nil {
+		return "", errors.New("S3 storage is not configured")
+	}
+	if !validObjectKey(objectKey) {
+		return "", errors.New("invalid object key")
+	}
+	if ttl < time.Minute || ttl > 60*time.Minute {
+		return "", errors.New("presigned download expiry must be between 1 and 60 minutes")
+	}
 	u := *s.endpoint
 	u.Path = strings.TrimRight(u.Path, "/") + "/" + s.bucket + "/" + objectKey
 	u.RawPath = ""
@@ -34,4 +40,3 @@ func (s *S3Presigner) PresignGet(objectKey string, now time.Time, ttl time.Durat
 	u.RawQuery = q.Encode()
 	return u.String(), nil
 }
-

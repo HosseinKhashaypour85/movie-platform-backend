@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"movie-platform/internal/middleware"
 	"gorm.io/gorm"
+	"movie-platform/internal/middleware"
 )
 
 type AuditLog struct {
@@ -94,15 +94,15 @@ func AuditMiddleware(db *gorm.DB, logger *slog.Logger) func(http.Handler) http.H
 			}
 
 			entry := AuditLog{
-				ActorUserID: actorID,
-				Action: r.Method,
+				ActorUserID:  actorID,
+				Action:       r.Method,
 				ResourceType: resourceType,
-				ResourceID: resourceID,
-				Path: truncateAuditValue(r.URL.Path, 255),
-				StatusCode: status,
-				IPAddress: ip,
-				UserAgent: userAgent,
-				RequestID: requestID,
+				ResourceID:   resourceID,
+				Path:         truncateAuditValue(r.URL.Path, 255),
+				StatusCode:   status,
+				IPAddress:    ip,
+				UserAgent:    userAgent,
+				RequestID:    requestID,
 			}
 			ctx, cancel := context.WithTimeout(context.WithoutCancel(r.Context()), 2*time.Second)
 			defer cancel()
@@ -174,7 +174,7 @@ func (h *Handler) ListAuditLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.JSON(w, http.StatusOK, map[string]any{
-		"items": rows,
+		"items":      rows,
 		"pagination": map[string]any{"page": page, "limit": limit, "total": total},
 	})
 }

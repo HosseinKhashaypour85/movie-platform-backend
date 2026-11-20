@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"net/http"
 	"net"
+	"net/http"
 	"strings"
 
 	"movie-platform/internal/httpx"
@@ -72,11 +72,15 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	httpx.JSON(w, 200, map[string]any{"access_token": token, "refresh_token": refresh, "token_type": "Bearer", "expires_in": int64(h.Service.Config.JWTTTL.Seconds()), "user": u})
 }
 
-type refreshRequest struct { RefreshToken string `json:"refresh_token"` }
+type refreshRequest struct {
+	RefreshToken string `json:"refresh_token"`
+}
 
 func clientIP(r *http.Request) string {
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil { return "" }
+	if err != nil {
+		return ""
+	}
 	return host
 }
 
@@ -91,28 +95,36 @@ func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, 401, "invalid_refresh_token", "refresh token is invalid or expired")
 		return
 	}
-	httpx.JSON(w, 200, map[string]any{"access_token":access, "refresh_token":refresh, "token_type":"Bearer", "expires_in":int64(h.Service.Config.JWTTTL.Seconds())})
+	httpx.JSON(w, 200, map[string]any{"access_token": access, "refresh_token": refresh, "token_type": "Bearer", "expires_in": int64(h.Service.Config.JWTTTL.Seconds())})
 }
 
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserIDFromContext(r.Context())
-	if !ok { httpx.Error(w, 401, "unauthorized", "authentication required"); return }
+	if !ok {
+		httpx.Error(w, 401, "unauthorized", "authentication required")
+		return
+	}
 	var q refreshRequest
 	if decode(r, &q) != nil || strings.TrimSpace(q.RefreshToken) == "" {
 		httpx.Error(w, 400, "invalid_input", "refresh_token is required")
 		return
 	}
 	if err := h.Service.Sessions.Revoke(q.RefreshToken, userID); err != nil {
-		httpx.Error(w, 500, "internal_error", "internal server error"); return
+		httpx.Error(w, 500, "internal_error", "internal server error")
+		return
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *Handler) LogoutAll(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserIDFromContext(r.Context())
-	if !ok { httpx.Error(w, 401, "unauthorized", "authentication required"); return }
+	if !ok {
+		httpx.Error(w, 401, "unauthorized", "authentication required")
+		return
+	}
 	if err := h.Service.Sessions.RevokeAll(userID); err != nil {
-		httpx.Error(w, 500, "internal_error", "internal server error"); return
+		httpx.Error(w, 500, "internal_error", "internal server error")
+		return
 	}
 	w.WriteHeader(http.StatusNoContent)
 }

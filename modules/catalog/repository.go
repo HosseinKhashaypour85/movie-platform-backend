@@ -54,8 +54,12 @@ func (r *Repository) ListSeries(query string, genreID uint, year uint16, limit, 
 		like := "%" + query + "%"
 		tx = tx.Where("title LIKE ? OR original_title LIKE ?", like, like)
 	}
-	if year > 0 { tx = tx.Where("release_year = ?", year) }
-	if genreID > 0 { tx = tx.Joins("JOIN series_genres ON series_genres.series_id = series.id").Where("series_genres.genre_id = ?", genreID) }
+	if year > 0 {
+		tx = tx.Where("release_year = ?", year)
+	}
+	if genreID > 0 {
+		tx = tx.Joins("JOIN series_genres ON series_genres.series_id = series.id").Where("series_genres.genre_id = ?", genreID)
+	}
 	var total int64
 	if err := tx.Session(&gorm.Session{}).Distinct("series.id").Count(&total).Error; err != nil {
 		return nil, 0, err
@@ -78,16 +82,22 @@ func (r *Repository) Genres() ([]Genre, error) {
 }
 func (r *Repository) Seasons(seriesID uint) ([]Season, error) {
 	var parent Series
-	if err := r.DB.Where("is_published = ?", true).First(&parent, seriesID).Error; err != nil { return nil, err }
+	if err := r.DB.Where("is_published = ?", true).First(&parent, seriesID).Error; err != nil {
+		return nil, err
+	}
 	var rows []Season
 	err := r.DB.Where("series_id = ?", seriesID).Order("number ASC").Find(&rows).Error
 	return rows, err
 }
 func (r *Repository) Episodes(seasonID uint) ([]Episode, error) {
 	var season Season
-	if err := r.DB.First(&season, seasonID).Error; err != nil { return nil, err }
+	if err := r.DB.First(&season, seasonID).Error; err != nil {
+		return nil, err
+	}
 	var parent Series
-	if err := r.DB.Where("id = ? AND is_published = ?", season.SeriesID, true).First(&parent).Error; err != nil { return nil, err }
+	if err := r.DB.Where("id = ? AND is_published = ?", season.SeriesID, true).First(&parent).Error; err != nil {
+		return nil, err
+	}
 	var rows []Episode
 	err := r.DB.Where("season_id = ? AND is_published = ?", seasonID, true).Order("number ASC").Find(&rows).Error
 	return rows, err
