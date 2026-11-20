@@ -24,22 +24,30 @@ func TestSignedPlaybackURL(t *testing.T) {
 	exp, err := strconv.ParseInt(u.Query().Get("expires"), 10, 64)
 	if err != nil || exp != expires.Unix() { t.Fatalf("invalid expiry: %v", err) }
 	sig := u.Query().Get("signature")
-	if !VerifyPlaybackSignature(key, u.Path, exp, sig, now) {
-		t.Fatal("valid signature rejected")
+	scope := u.Query().Get("scope")
+	if scope != "/movies/42/" { t.Fatalf("unexpected scope: %s", scope) }
+	if !VerifyPlaybackScopeSignature(key, scope, u.Path, exp, sig, now) {
+		t.Fatal("valid scoped signature rejected")
 	}
-	if VerifyPlaybackSignature(key, "/movies/43/master.m3u8", exp, sig, now) {
-		t.Fatal("signature must bind the object path")
+	if VerifyPlaybackScopeSignature(key, scope, "/movies/43/segment.ts", exp, sig, now) {
+		t.Fatal("signature must not authorize another asset")
+	}
+	if !VerifyPlaybackScopeSignature(key, scope, "/movies/42/720p/segment_00001.ts", exp, sig, now) {
+		t.Fatal("valid variant segment rejected")
+	}
+	if VerifyPlaybackScopeSignature(key, scope, "/movies/420/segment.ts", exp, sig, now) {
+		t.Fatal("prefix boundary bypass accepted")
 	}
 	if VerifyPlaybackSignature(key, u.Path, exp, sig, expires) {
 		t.Fatal("expired signature accepted")
 	}
-	if VerifyPlaybackSignature([]byte(strings.Repeat("x", 40)), u.Path, exp, sig, now) {
+	if VerifyPlaybackScopeSignature([]byte(strings.Repeat("x", 40)), scope, u.Path, exp, sig, now) {
 		t.Fatal("wrong key accepted")
 	}
-	if VerifyPlaybackSignature(key, u.Path, exp, sig+"A", now) {
+	if VerifyPlaybackScopeSignature(key, scope, u.Path, exp, sig+"A", now) {
 		t.Fatal("tampered signature accepted")
 	}
-	if VerifyPlaybackSignature(key, u.Path, now.Add(time.Hour).Unix(), signature(key, u.Path, now.Add(time.Hour).Unix()), now) {
+	if VerifyPlaybackScopeSignature(key, scope, u.Path, now.Add(time.Hour).Unix(), signature(key, scope, now.Add(time.Hour).Unix()), now) {
 		t.Fatal("excessively long expiry accepted")
 	}
 }

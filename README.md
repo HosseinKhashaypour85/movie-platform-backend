@@ -69,15 +69,7 @@ signer prevents API startup. The response includes `manifest_url`,
 five minutes and must not be cached or logged.
 
 **Important:** This backend only issues signed manifest URLs; it does not
-serve HLS playlists/segments or configure an edge CDN. The signature is
-base64url(HMAC-SHA256(key, canonicalPath + "\\n" + decimalUnixExpiry)).
-The query parameters are `expires` and `signature`. The provided
-`VerifyPlaybackSignature` helper is a reference verifier for a trusted
-edge integration. An actual deployment MUST enforce signatures and
-expiry on every protected media request, including HLS variant playlists,
-segments and encryption keys, with a suitable segment authorization
-mechanism (e.g. edge-validated signed cookies or manifest rewriting).
-Signing only the master playlist does **not** secure HLS segments.
+serve HLS playlists/segments or configure an edge CDN. The manifest URL includes `expires`, `scope`, and `signature`. The signature is base64url(HMAC-SHA256(key, canonicalAssetDirectory + "\\n" + decimalUnixExpiry)); `scope` is the canonical directory containing the master playlist and all its variants/segments. `VerifyPlaybackScopeSignature` is a reference verifier for a trusted edge integration: it validates expiry, the signature, canonical scope, and that each requested object path remains inside that exact asset directory. An edge can validate the signed master request and exchange it for a short-lived, path-scoped signed cookie, or rewrite child playlist URIs to carry equivalent authorization. It MUST enforce authorization for every variant playlist, segment and encryption key. The legacy `VerifyPlaybackSignature` helper remains for exact-object signatures. Signing only the master playlist without propagating authorization does **not** secure HLS segments.
 Keep the storage origin private, reject noncanonical paths, and do not
 enable public access to the bucket. CDN provider integration and end-to-end
 playback tests are still outstanding.
