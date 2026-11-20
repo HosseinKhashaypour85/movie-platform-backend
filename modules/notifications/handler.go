@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 	"movie-platform/internal/httpx"
 	"movie-platform/internal/middleware"
+	"movie-platform/modules/users"
 )
 
 type Handler struct { db *gorm.DB }
@@ -53,7 +54,7 @@ func (h *Handler) Broadcast(w http.ResponseWriter,r *http.Request) {
 	batch:=500
 	for {
 		var ids []uint
-		if err:=h.db.Model(&struct{ID uint; IsActive bool}{ }).Where("id > ? AND is_active = ?",lastID,true).Order("id ASC").Limit(batch).Pluck("id",&ids).Error; err!=nil { httpx.Error(w,500,"internal_error","internal server error"); return }
+		if err:=h.db.Model(&users.User{}).Where("id > ? AND is_active = ?",lastID,true).Order("id ASC").Limit(batch).Pluck("id",&ids).Error; err!=nil { httpx.Error(w,500,"internal_error","internal server error"); return }
 		if len(ids)==0 { break }
 		rows:=make([]Notification,0,len(ids))
 		for _,id:=range ids { rows=append(rows,Notification{UserID:id,Title:in.Title,Body:in.Body,Type:in.Type,ActionURL:in.ActionURL}) }
