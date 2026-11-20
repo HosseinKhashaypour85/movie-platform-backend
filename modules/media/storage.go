@@ -109,3 +109,48 @@ func strconvI(v int) string {
 	}
 	return string(b[i:])
 }
+
+func (s *S3Presigner) PresignGet(objectKey string, now time.Time, ttl time.Duration) (string, error) {
+	return s.presignRead("GET", objectKey, now, ttl)
+}
+
+// PresignHead signs a metadata-only request so HEAD never downloads a media body.
+func (s *S3Presigner) PresignHead(objectKey string, now time.Time, ttl time.Duration) (string, error) {
+	return s.presignRead("HEAD", objectKey, now, ttl)
+}
+
+func (s *S3Presigner) presignRead(method, objectKey string, now time.Time, ttl time.Duration) (string, error) {
+	if s == nil || s.endpoint == nil {
+		return "", errors.New("S3 storage is not configured")
+	}
+	if !validObjectKey(objectKey) || (method != "GET" && method != "HEAD") {
+		return "", errors.New("invalid object key or read method")
+	}
+	if ttl < time.Minute || ttl > 15*time.Minute {
+		return "", errors.New("presigned read expiry must be between 1 and 15 minutes")
+	}
+	u := *s.endpoint
+	prefix := strings.TrimRight(u.Path, "/")
+	u.Path = prefix + "/" + s.bucket + "/" + objectKey
+	u.RawPath = ""
+	now = now.UTC()
+	date := now.Format("20060102")
+	amzDate := now.Format("20060102T150405Z")
+	scope := date + "/" + s.region + "/s3/aws4_request"
+	signedHeaders := "host"
+	q := u.Query()
+	q.Set("X-Amz-Algorithm", "AWS4-HMAC-SHA256")
+	q.Set("X-Amz-Credential", s.accessKey+"/"+scope)
+	q.Set("X-Amz-Date", amzDate)
+	q.Set("X-Amz-Expires", strconvI(int(ttl.Seconds())))
+	q.Set("X-Amz-SignedHeaders", signedHeaders)
+	u.RawQuery = q.Encode()
+	canonicalHeaders := "host:" + strings.ToLower(u.Host) + "\n"
+	canonicalRequest := method + "\n" + u.EscapedPath() + "\n" + u.RawQuery + "\n" + canonicalHeaders + "\n" + signedHeaders + "\nUNSIGNED-PAYLOAD"
+	stringToSign := "AWS4-HMAC-SHA256\n" + amzDate + "\n" + scope + "\n" + sha256Hex(canonicalRequest)
+	signature := hex.EncodeToString(hmacSHA256(s.signingKey(date), stringToSign))
+	q = u.Query()
+	q.Set("X-Amz-Signature", signature)
+	u.RawQuery = q.Encode()
+	return u.String(), nil
+}
