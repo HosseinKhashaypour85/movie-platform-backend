@@ -100,7 +100,7 @@ func (h *UploadHandler) CreateUpload(w http.ResponseWriter,r *http.Request) {
 }
 
 func RegisterUploadRoutes(r chi.Router,h *UploadHandler) {
-	r.Route("/media",func(a chi.Router) {
+	r.Route("/admin/media",func(a chi.Router) {
 		a.Use(middleware.RequireRole("admin","super_admin"))
 		a.Post("/uploads",h.CreateUpload)
 	})
