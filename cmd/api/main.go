@@ -15,6 +15,9 @@ import (
 	"movie-platform/internal/httpx"
 	"movie-platform/internal/middleware"
 	"movie-platform/modules/admin"
+	"movie-platform/modules/media"
+	"movie-platform/modules/notifications"
+	"movie-platform/modules/ads"
 	"movie-platform/modules/auth"
 	"movie-platform/modules/catalog"
 	"movie-platform/modules/engagement"
@@ -45,18 +48,22 @@ func main() {
 	defer sqlDB.Close()
 
 	if cfg.Environment != "production" {
-		if err := db.AutoMigrate(&users.User{}, &auth.Session{}, &watch_history.WatchHistory{}, &catalog.Genre{}, &catalog.Movie{}, &catalog.Series{}, &catalog.Season{}, &catalog.Episode{}, &engagement.Favorite{}, &engagement.Rating{}, &admin.AuditLog{}); err != nil {
+		if err := db.AutoMigrate(&users.User{}, &auth.Session{}, &ads.Campaign{}, &ads.Event{}, &media.Asset{}, &media.Subtitle{}, &media.SubtitleJob{}, &notifications.Notification{}, &watch_history.EpisodeWatchHistory{}, &watch_history.WatchHistory{}, &catalog.Genre{}, &catalog.Movie{}, &catalog.Series{}, &catalog.Season{}, &catalog.Episode{}, &engagement.Favorite{}, &engagement.Rating{}, &admin.AuditLog{}); err != nil {
 			logger.Error("migration failed", "error", err)
 			os.Exit(1)
 		}
 	}
 
 	userRepo := users.NewRepository(db)
+	userHandler := users.NewHandler(db)
 	authHandler := auth.NewHandler(auth.NewService(userRepo, auth.NewSessionRepository(db), cfg))
 	historyHandler := watch_history.NewHandler(watch_history.NewService(watch_history.NewRepository(db)))
 	catalogHandler := catalog.NewHandler(catalog.NewService(catalog.NewRepository(db)))
 	engagementHandler := engagement.NewHandler(engagement.NewService(engagement.NewRepository(db)))
 	adminHandler := admin.NewHandler(db)
+	adsHandler := ads.NewHandler(db)
+	mediaHandler := media.NewHandler(db)
+	notificationHandler := notifications.NewHandler(db)
 
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID, middleware.Recover(logger), middleware.SecurityHeaders, middleware.BodyLimit(1<<20), middleware.Timeout(15*time.Second), middleware.RateLimit(120, time.Minute), middleware.CORS(cfg.AllowedOrigins))
@@ -74,31 +81,26 @@ func main() {
 		httpx.JSON(w, 200, map[string]string{"status": "ready"})
 	})
 
+	router.Route("/internal/v1", func(r chi.Router) { media.RegisterWorkerRoutes(r, mediaHandler) })
 	router.Route("/api/v1", func(r chi.Router) {
 		auth.RegisterRoutes(r, authHandler)
 		catalog.RegisterRoutes(r, catalogHandler)
 		engagement.RegisterPublicRoutes(r, engagementHandler)
+		ads.RegisterPublicRoutes(r, adsHandler)
+		media.RegisterPublicRoutes(r, mediaHandler)
 
 		r.Group(func(protected chi.Router) {
 			protected.Use(middleware.Auth(cfg.JWTSecret, cfg.JWTIssuer))
 			admin.RegisterRoutes(protected, adminHandler)
+			ads.RegisterAdminRoutes(protected, adsHandler)
+			media.RegisterAdminRoutes(protected, mediaHandler)
+			notifications.RegisterAdminRoutes(protected, notificationHandler)
 		})
 
 		r.Group(func(p chi.Router) {
 			p.Use(middleware.Auth(cfg.JWTSecret, cfg.JWTIssuer))
-			p.Get("/profile", func(w http.ResponseWriter, req *http.Request) {
-				id, ok := middleware.UserIDFromContext(req.Context())
-				if !ok {
-					httpx.Error(w, 401, "unauthorized", "authentication required")
-					return
-				}
-				u, err := userRepo.FindByID(id)
-				if err != nil || !u.IsActive {
-					httpx.Error(w, 401, "unauthorized", "authentication required")
-					return
-				}
-				httpx.JSON(w, 200, u)
-			})
+			users.RegisterRoutes(p, userHandler)
+			notifications.RegisterUserRoutes(p, notificationHandler)
 			watch_history.RegisterRoutes(p, historyHandler)
 			engagement.RegisterProtectedRoutes(p, engagementHandler)
 		})
