@@ -64,7 +64,7 @@ func (s *S3Presigner) HeadObject(ctx context.Context, objectKey string) (ObjectM
 
 func validObjectKey(key string) bool {
 	if key == "" || len(key) > 1024 || strings.HasPrefix(key, "/") ||
-		strings.Contains(key, "\\\\") || strings.ContainsAny(key, "\r\n") ||
+		strings.Contains(key, "\\") || strings.ContainsAny(key, "\r\n") ||
 		path.Clean(key) != key {
 		return false
 	}
