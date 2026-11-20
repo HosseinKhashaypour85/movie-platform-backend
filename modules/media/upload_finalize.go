@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"
 	"movie-platform/internal/httpx"
 	"movie-platform/modules/catalog"
