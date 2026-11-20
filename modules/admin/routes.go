@@ -11,6 +11,7 @@ func RegisterRoutes(r chi.Router, h *Handler) {
 		r.Use(middleware.RequireRole("admin", "super_admin"))
 		r.Use(AuditMiddleware(h.db, slog.Default()))
 		r.Get("/dashboard", h.Dashboard)
+		r.Get("/analytics", h.Analytics)
 		r.Get("/audit-logs", h.ListAuditLogs)
 		r.Route("/movies", func(r chi.Router) {
 			r.Post("/", h.CreateMovie)
