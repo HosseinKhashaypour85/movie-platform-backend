@@ -1,0 +1,63 @@
+CREATE TABLE IF NOT EXISTS media_assets (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  movie_id BIGINT UNSIGNED NULL,
+  episode_id BIGINT UNSIGNED NULL,
+  kind VARCHAR(20) NOT NULL,
+  storage_key VARCHAR(1024) NOT NULL,
+  playback_url VARCHAR(2048) NULL,
+  mime_type VARCHAR(120) NULL,
+  size_bytes BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  duration_seconds INT UNSIGNED NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at DATETIME(3) NULL,
+  updated_at DATETIME(3) NULL,
+  PRIMARY KEY (id),
+  KEY idx_media_assets_movie (movie_id),
+  KEY idx_media_assets_episode (episode_id),
+  KEY idx_media_assets_kind_active (kind,is_active),
+  CONSTRAINT fk_media_assets_movie FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
+  CONSTRAINT fk_media_assets_episode FOREIGN KEY (episode_id) REFERENCES episodes(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS subtitles (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  movie_id BIGINT UNSIGNED NULL,
+  episode_id BIGINT UNSIGNED NULL,
+  language VARCHAR(12) NOT NULL,
+  label VARCHAR(80) NOT NULL,
+  format VARCHAR(12) NOT NULL,
+  storage_key VARCHAR(1024) NOT NULL,
+  download_url VARCHAR(2048) NULL,
+  is_generated BOOLEAN NOT NULL DEFAULT FALSE,
+  is_published BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at DATETIME(3) NULL,
+  updated_at DATETIME(3) NULL,
+  PRIMARY KEY (id),
+  KEY idx_subtitles_movie (movie_id),
+  KEY idx_subtitles_episode (episode_id),
+  KEY idx_subtitles_published (is_published),
+  CONSTRAINT fk_subtitles_movie FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
+  CONSTRAINT fk_subtitles_episode FOREIGN KEY (episode_id) REFERENCES episodes(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS subtitle_jobs (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  movie_id BIGINT UNSIGNED NULL,
+  episode_id BIGINT UNSIGNED NULL,
+  source_asset_id BIGINT UNSIGNED NOT NULL,
+  source_language VARCHAR(12) NOT NULL,
+  target_language VARCHAR(12) NOT NULL,
+  status VARCHAR(20) NOT NULL,
+  attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  error_message VARCHAR(1000) NULL,
+  output_subtitle_id BIGINT UNSIGNED NULL,
+  locked_at DATETIME(3) NULL,
+  created_at DATETIME(3) NULL,
+  updated_at DATETIME(3) NULL,
+  PRIMARY KEY (id),
+  KEY idx_subtitle_jobs_status (status),
+  KEY idx_subtitle_jobs_movie (movie_id),
+  KEY idx_subtitle_jobs_episode (episode_id),
+  CONSTRAINT fk_subtitle_jobs_asset FOREIGN KEY (source_asset_id) REFERENCES media_assets(id),
+  CONSTRAINT fk_subtitle_jobs_subtitle FOREIGN KEY (output_subtitle_id) REFERENCES subtitles(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
