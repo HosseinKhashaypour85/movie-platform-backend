@@ -82,6 +82,12 @@ func main() {
 	adminHandler := admin.NewHandler(db)
 	adsHandler := ads.NewHandler(db)
 	mediaHandler := media.NewHandler(db)
+	s3Presigner, err := media.NewS3PresignerFromEnv()
+	if err != nil {
+		logger.Error("object storage configuration failed", "error", err)
+		os.Exit(1)
+	}
+	uploadHandler := media.NewUploadHandler(db, s3Presigner)
 	playbackHandler, err := media.NewPlayback(db)
 	if err != nil {
 		logger.Error("playback configuration failed", "error", err)
@@ -132,6 +138,7 @@ func main() {
 			admin.RegisterRoutes(protected, adminHandler)
 			ads.RegisterAdminRoutes(protected, adsHandler)
 			media.RegisterAdminRoutes(protected, mediaHandler)
+			media.RegisterUploadRoutes(protected, uploadHandler)
 			notifications.RegisterAdminRoutes(protected, notificationHandler)
 		})
 

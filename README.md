@@ -81,3 +81,38 @@ Signing only the master playlist does **not** secure HLS segments.
 Keep the storage origin private, reject noncanonical paths, and do not
 enable public access to the bucket. CDN provider integration and end-to-end
 playback tests are still outstanding.
+
+## Direct media uploads to S3-compatible storage
+
+Configure all five `S3_*` variables in `.env` to enable direct uploads.
+The endpoint must be HTTPS and the bucket should remain private. The API
+supports AWS S3 and S3-compatible endpoints using path-style bucket URLs.
+
+An authenticated administrator can request a short-lived upload URL:
+
+```http
+POST /api/v1/admin/media/uploads
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "target_type": "movie",
+  "target_id": 42,
+  "kind": "video",
+  "content_type": "video/mp4"
+}
+```
+
+The response contains a `PUT` URL, the exact `Content-Type` header to send,
+a generated `storage_key`, and a 10-minute expiry. Upload the bytes directly
+to object storage using that method and header. Supported content types are
+MP4 video and JPEG/PNG/WebP images. The upload URL is signed with AWS Signature
+Version 4 and binds the HTTP method, object path, expiry, host and content type.
+
+This endpoint only issues upload URLs. It does not yet verify object existence,
+enforce a maximum upload size, create the `media_assets` database row, scan
+uploads, or transcode source video into HLS. Do not expose uploaded objects
+publicly. A follow-up asset-finalization workflow must verify the uploaded
+object (HEAD), inspect actual size and MIME type, and then create the asset
+record. Configure bucket CORS to allow PUT from the admin web origin and
+restrict IAM credentials to the intended bucket/prefix and required actions.
