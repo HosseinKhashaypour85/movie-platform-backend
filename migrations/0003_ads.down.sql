@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS ad_events;
+DROP TABLE IF EXISTS ad_campaigns;
