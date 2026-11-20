@@ -14,6 +14,13 @@ func RegisterRoutes(r chi.Router, h *Handler) {
 		r.Get("/users", h.ListUsers)
 		r.Patch("/users/{id}/status", h.SetUserStatus)
 		r.Patch("/users/{id}/role", h.SetUserRole)
+		r.Post("/genres", h.CreateGenre)
+		r.Put("/genres/{id}", h.UpdateGenre)
+		r.Delete("/genres/{id}", h.DeleteGenre)
+		r.Get("/analytics", h.Analytics)
+		r.Get("/users", h.ListUsers)
+		r.Patch("/users/{id}/status", h.SetUserStatus)
+		r.Patch("/users/{id}/role", h.SetUserRole)
 		r.Get("/audit-logs", h.ListAuditLogs)
 		r.Route("/movies", func(r chi.Router) {
 			r.Post("/", h.CreateMovie)
