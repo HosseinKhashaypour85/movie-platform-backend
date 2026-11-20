@@ -85,11 +85,12 @@ func (w *Worker) process(ctx context.Context, job *media.TranscodeJob) error {
 	masterPlaylist:=filepath.Join(outDir,"master.m3u8")
 	ffCtx,cancel:=context.WithTimeout(ctx,6*time.Hour)
 	defer cancel()
-	width,height,err:=w.probe(ffCtx,input)
+	width,height,hasAudio,err:=w.probe(ffCtx,input)
 	if err!=nil { return err }
 	renditions:=SelectRenditions(height)
 	if len(renditions)==0 { return errors.New("source video is too small for supported HLS renditions") }
-	args,err:=BuildABRArguments(outDir,width,height,renditions)
+	if err:=createRenditionDirs(outDir,renditions); err!=nil { return err }
+	args,err:=BuildABRArguments(outDir,width,height,renditions,hasAudio)
 	if err!=nil { return err }
 	args=append([]string{"-hide_banner","-nostdin","-y","-i",input},args...)
 	cmd:=exec.CommandContext(ffCtx,w.FFmpegPath,args...)
