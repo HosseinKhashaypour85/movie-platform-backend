@@ -41,3 +41,15 @@ Create database and dedicated least-privilege account. For production, use TLS t
 
 ## Not yet a complete production product
 Catalog CRUD, seasons/episodes, content rights metadata, signed playback URLs, HLS packaging, search, genres, actors, ratings/comments, ads, analytics, admin RBAC, audit trail delivery, email/OTP verification, refresh-token rotation/revocation, password reset, AI job queue/workers, billing and cloud storage/CDN integrations remain to be specified and implemented. Security requires deployment review, TLS/reverse-proxy configuration, external rate limiting, secrets rotation, database migrations, monitoring, backups and penetration testing.
+
+## Production database migrations
+
+The repository contains ordered, versioned SQL migrations under `migrations/`. Apply pending migrations with:
+
+```bash
+go run ./cmd/migrate
+```
+
+The runner records applied filenames in `schema_migrations` and applies only unapplied `*.up.sql` files in lexical order. Back up production before applying schema changes. MySQL DDL may implicitly commit, so migrations are written to be rerunnable with `IF NOT EXISTS` where applicable. Review rollback SQL manually; the application does not automatically run down migrations.
+
+Do not use AutoMigrate in production. Configure database credentials and the required application environment variables through the deployment secret manager.
