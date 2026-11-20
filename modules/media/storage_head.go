@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -60,3 +61,15 @@ func (s *S3Presigner) HeadObject(ctx context.Context, objectKey string) (ObjectM
 	return ObjectMetadata{SizeBytes:size, ContentType:strings.ToLower(strings.TrimSpace(strings.Split(resp.Header.Get("Content-Type"), ";")[0]))}, nil
 }
 
+
+func validObjectKey(key string) bool {
+	if key == "" || len(key) > 1024 || strings.HasPrefix(key, "/") ||
+		strings.Contains(key, "\\\\") || strings.ContainsAny(key, "\r\n") ||
+		path.Clean(key) != key {
+		return false
+	}
+	for _, part := range strings.Split(key, "/") {
+		if part == "" || part == "." || part == ".." { return false }
+	}
+	return true
+}
