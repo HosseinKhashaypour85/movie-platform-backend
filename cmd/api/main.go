@@ -53,6 +53,7 @@ func main() {
 	}
 
 	userRepo := users.NewRepository(db)
+	userHandler := users.NewHandler(db)
 	authHandler := auth.NewHandler(auth.NewService(userRepo, auth.NewSessionRepository(db), cfg))
 	historyHandler := watch_history.NewHandler(watch_history.NewService(watch_history.NewRepository(db)))
 	catalogHandler := catalog.NewHandler(catalog.NewService(catalog.NewRepository(db)))
@@ -90,19 +91,7 @@ func main() {
 
 		r.Group(func(p chi.Router) {
 			p.Use(middleware.Auth(cfg.JWTSecret, cfg.JWTIssuer))
-			p.Get("/profile", func(w http.ResponseWriter, req *http.Request) {
-				id, ok := middleware.UserIDFromContext(req.Context())
-				if !ok {
-					httpx.Error(w, 401, "unauthorized", "authentication required")
-					return
-				}
-				u, err := userRepo.FindByID(id)
-				if err != nil || !u.IsActive {
-					httpx.Error(w, 401, "unauthorized", "authentication required")
-					return
-				}
-				httpx.JSON(w, 200, u)
-			})
+			users.RegisterRoutes(p, userHandler)
 			watch_history.RegisterRoutes(p, historyHandler)
 			engagement.RegisterProtectedRoutes(p, engagementHandler)
 		})
