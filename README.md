@@ -53,3 +53,31 @@ go run ./cmd/migrate
 The runner records applied filenames in `schema_migrations` and applies only unapplied `*.up.sql` files in lexical order. Back up production before applying schema changes. MySQL DDL may implicitly commit, so migrations are written to be rerunnable with `IF NOT EXISTS` where applicable. Review rollback SQL manually; the application does not automatically run down migrations.
 
 Do not use AutoMigrate in production. Configure database credentials and the required application environment variables through the deployment secret manager.
+
+## Signed HLS playback (integration contract)
+
+Authenticated clients can call `GET /api/v1/playback/movies/{id}` or
+`GET /api/v1/playback/episodes/{id}` with a bearer access token. Only
+published titles/episodes with an active `video` media asset can receive
+a manifest URL. Assets must use an HLS `.m3u8` storage key.
+
+Configure both `PLAYBACK_CDN_BASE_URL` (an HTTPS origin) and
+`PLAYBACK_SIGNING_KEY` (a dedicated random secret of at least 32 bytes).
+When neither is set, the endpoint responds 503; a partially configured
+signer prevents API startup. The response includes `manifest_url`,
+`expires_at`, `asset_id`, and `format: hls`. The URL expires after
+five minutes and must not be cached or logged.
+
+**Important:** This backend only issues signed manifest URLs; it does not
+serve HLS playlists/segments or configure an edge CDN. The signature is
+base64url(HMAC-SHA256(key, canonicalPath + "\\n" + decimalUnixExpiry)).
+The query parameters are `expires` and `signature`. The provided
+`VerifyPlaybackSignature` helper is a reference verifier for a trusted
+edge integration. An actual deployment MUST enforce signatures and
+expiry on every protected media request, including HLS variant playlists,
+segments and encryption keys, with a suitable segment authorization
+mechanism (e.g. edge-validated signed cookies or manifest rewriting).
+Signing only the master playlist does **not** secure HLS segments.
+Keep the storage origin private, reject noncanonical paths, and do not
+enable public access to the bucket. CDN provider integration and end-to-end
+playback tests are still outstanding.
