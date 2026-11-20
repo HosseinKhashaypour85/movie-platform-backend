@@ -59,3 +59,26 @@ func TestS3PresignRejectsInvalidConfigurationAndInputs(t *testing.T) {
 		t.Fatal("accepted excessive URL lifetime")
 	}
 }
+
+func TestS3PresignReadMethods(t *testing.T) {
+	endpoint, _ := url.Parse("https://objects.example.test")
+	s := &S3Presigner{endpoint: endpoint, bucket: "media-bucket", region: "eu-central-1", accessKey: "AKIATEST", secretKey: strings.Repeat("s", 40)}
+	now := time.Date(2026, 11, 20, 12, 30, 0, 0, time.UTC)
+
+	getURL, err := s.PresignGet("hls/42/master.m3u8", now, time.Minute)
+	if err != nil { t.Fatal(err) }
+	headURL, err := s.PresignHead("hls/42/master.m3u8", now, time.Minute)
+	if err != nil { t.Fatal(err) }
+	get, err := url.Parse(getURL)
+	if err != nil { t.Fatal(err) }
+	head, err := url.Parse(headURL)
+	if err != nil { t.Fatal(err) }
+	for _, parsed := range []*url.URL{get, head} {
+		if parsed.Path != "/media-bucket/hls/42/master.m3u8" { t.Fatalf("unexpected object path: %s", parsed.Path) }
+		if parsed.Query().Get("X-Amz-SignedHeaders") != "host" { t.Fatal("read URL must sign host") }
+		if len(parsed.Query().Get("X-Amz-Signature")) != 64 { t.Fatal("missing SigV4 signature") }
+	}
+	if get.Query().Get("X-Amz-Signature") == head.Query().Get("X-Amz-Signature") {
+		t.Fatal("GET and HEAD must have method-specific signatures")
+	}
+}
