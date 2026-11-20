@@ -15,6 +15,7 @@ import (
 	"movie-platform/internal/httpx"
 	"movie-platform/internal/middleware"
 	"movie-platform/modules/admin"
+	"movie-platform/modules/notifications"
 	"movie-platform/modules/auth"
 	"movie-platform/modules/catalog"
 	"movie-platform/modules/engagement"
@@ -45,7 +46,7 @@ func main() {
 	defer sqlDB.Close()
 
 	if cfg.Environment != "production" {
-		if err := db.AutoMigrate(&users.User{}, &auth.Session{}, &watch_history.WatchHistory{}, &catalog.Genre{}, &catalog.Movie{}, &catalog.Series{}, &catalog.Season{}, &catalog.Episode{}, &engagement.Favorite{}, &engagement.Rating{}, &admin.AuditLog{}); err != nil {
+		if err := db.AutoMigrate(&users.User{}, &auth.Session{}, &notifications.Notification{}, &watch_history.WatchHistory{}, &catalog.Genre{}, &catalog.Movie{}, &catalog.Series{}, &catalog.Season{}, &catalog.Episode{}, &engagement.Favorite{}, &engagement.Rating{}, &admin.AuditLog{}); err != nil {
 			logger.Error("migration failed", "error", err)
 			os.Exit(1)
 		}
@@ -57,6 +58,7 @@ func main() {
 	catalogHandler := catalog.NewHandler(catalog.NewService(catalog.NewRepository(db)))
 	engagementHandler := engagement.NewHandler(engagement.NewService(engagement.NewRepository(db)))
 	adminHandler := admin.NewHandler(db)
+	notificationHandler := notifications.NewHandler(db)
 
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID, middleware.Recover(logger), middleware.SecurityHeaders, middleware.BodyLimit(1<<20), middleware.Timeout(15*time.Second), middleware.RateLimit(120, time.Minute), middleware.CORS(cfg.AllowedOrigins))
@@ -82,6 +84,7 @@ func main() {
 		r.Group(func(protected chi.Router) {
 			protected.Use(middleware.Auth(cfg.JWTSecret, cfg.JWTIssuer))
 			admin.RegisterRoutes(protected, adminHandler)
+			notifications.RegisterAdminRoutes(protected, notificationHandler)
 		})
 
 		r.Group(func(p chi.Router) {
