@@ -82,6 +82,11 @@ func main() {
 	adminHandler := admin.NewHandler(db)
 	adsHandler := ads.NewHandler(db)
 	mediaHandler := media.NewHandler(db)
+	playbackHandler, err := media.NewPlayback(db)
+	if err != nil {
+		logger.Error("playback configuration failed", "error", err)
+		os.Exit(1)
+	}
 	notificationHandler := notifications.NewHandler(db)
 
 	router := chi.NewRouter()
@@ -133,6 +138,7 @@ func main() {
 		r.Group(func(p chi.Router) {
 			p.Use(middleware.Auth(cfg.JWTSecret, cfg.JWTIssuer))
 			users.RegisterRoutes(p, userHandler)
+			media.RegisterPlaybackRoutes(p, playbackHandler)
 			watch_history.RegisterRoutes(p, historyHandler)
 			notifications.RegisterUserRoutes(p, notificationHandler)
 			engagement.RegisterProtectedRoutes(p, engagementHandler)
